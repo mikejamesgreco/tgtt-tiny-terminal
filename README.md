@@ -10,6 +10,8 @@ Open the file, load local content when needed, and work directly in the browser.
 
 > **A tiny terminal for everyday developer tasks — one HTML file, no setup.**
 
+![TGTT Tiny Terminal screenshot](screenshot.jpeg)
+
 ## Run TGTT
 
 **[▶ Run TGTT in your browser](https://mikejamesgreco.github.io/tgtt-tiny-terminal/)**
