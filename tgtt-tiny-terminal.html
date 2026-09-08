@@ -1,0 +1,1934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TGTT Tiny Terminal — The Greco Tiny Terminal</title>
+<meta name="description" content="A single-file local-first browser developer toolbox with terminal commands, pipes, text transforms, JSON, CSV, regex, SQL helpers, hashes, dates, file tools, and more.">
+<style>
+:root{--bg:#08111f;--panel:#0f1a2b;--panel2:#0b1422;--line:#26364e;--text:#e6edf7;--muted:#8ea0b8;--blue:#60a5fa;--green:#86efac;--red:#fca5a5;--purple:#c4b5fd}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Consolas,Menlo,Monaco,"Courier New",monospace}body{padding:12px}
+.shell{max-width:1500px;margin:auto;display:flex;flex-direction:column;gap:10px}.top,.card,footer{border:1px solid var(--line);background:var(--panel);border-radius:10px}.top{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{font-weight:900}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.actions,.row{display:flex;gap:7px;flex-wrap:wrap}button,input,textarea{font:inherit}button{border:1px solid var(--line);background:#17243a;color:var(--text);border-radius:7px;padding:7px 10px;font-size:12px;font-weight:800;cursor:pointer}button:hover{border-color:#4b6280}.primary{background:#1d4ed8!important}.layout{display:grid;grid-template-columns:minmax(0,1fr) 365px;gap:10px}.terminal{min-height:720px;display:flex;flex-direction:column}.thead{padding:9px 11px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.status{font-size:11px;color:var(--muted)}#output{flex:1;min-height:470px;max-height:66vh;overflow:auto;background:#060d18;padding:12px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.45}.entry{margin:0 0 10px}.prompt{color:#93c5fd;font-weight:900}.cmd{color:var(--purple)}.result{margin-top:3px}.ok .result{color:var(--green)}.err .result{color:var(--red)}.meta{color:var(--muted);font-size:11px;margin-top:3px}.composer{padding:10px;border-top:1px solid var(--line);background:var(--panel2)}.cmdrow{display:flex;gap:8px;align-items:center}.ps1{color:#93c5fd;font-weight:900;white-space:nowrap}#command{flex:1;min-width:0;background:#07111f;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:9px 10px;outline:none}#command:focus,#scratch:focus{border-color:#3b82f6}.hint{margin-top:6px;color:var(--muted);font-size:11px}.side{display:flex;flex-direction:column;gap:10px}.side .card{padding:12px}.side h2{font-size:13px;margin:0 0 7px;color:#dbeafe}.side p{font-size:11px;color:var(--muted);margin:0 0 8px;line-height:1.4}#scratch{width:100%;min-height:220px;resize:vertical;background:#07111f;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px;font-size:12px;line-height:1.4}.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.quick button{font-size:11px;padding:7px 5px}.catalog-tools{display:grid;grid-template-columns:minmax(0,1fr) 122px;gap:6px;margin-bottom:7px}
+.catalog-tools input,.catalog-tools select{width:100%;background:#07111f;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:7px;font-size:11px;outline:none}
+.catalog-tools input:focus,.catalog-tools select:focus{border-color:#3b82f6}
+.catalog{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:7px;background:#07111f}
+.ci{padding:7px 8px;border-bottom:1px solid #1d2939;font-size:11px;cursor:pointer}.ci:hover{background:#101d30}.ci:last-child{border-bottom:0}
+.ci b{color:var(--purple)}.ci span{display:block;color:var(--muted);margin-top:2px}.ci .usage{color:#6f86a3}.cat{display:inline-block;margin-left:6px;padding:1px 5px;border:1px solid #34445b;border-radius:999px;color:#9fb0c6;font-size:9px;font-weight:700}
+.filebox{border:1px dashed #3a4d67;border-radius:8px;background:#0a1524;padding:9px;margin-bottom:8px}.filebox strong{font-size:11px;color:#dbeafe}.filemeta{font-size:10px;color:var(--muted);margin-top:4px;word-break:break-all}
+.dropactive{border-color:#60a5fa!important;background:#0d1c30!important}
+@media(max-width:500px){.catalog-tools{grid-template-columns:1fr}}footer{padding:9px 11px;font-size:10px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.hidden{display:none}@media(max-width:1050px){.layout{grid-template-columns:1fr}#output{max-height:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top"><div class="brand">TGTT Tiny Terminal<small>The Greco Tiny Terminal — Single-File Local Developer Toolbox</small></div><div class="actions"><button id="copyLast">Copy Last Output</button><button id="clear">Clear</button><button id="help">Help</button></div></header>
+<div class="layout">
+<section class="card terminal"><div class="thead"><strong>TGTT&gt; local JavaScript command shell</strong><span class="status" id="status">Ready · v0046</span></div><div id="output"></div><div class="composer"><div class="cmdrow"><span class="ps1">TGTT&gt;</span><input id="command" autocomplete="off" spellcheck="false" placeholder='Try: help   or   calc "(135000+50000/3)/12"'><button class="primary" id="run">Run</button></div><div class="hint">Enter = run · ↑/↓ = history · use | for pipelines · larger input comes from the Scratch Pad.</div></div></section>
+<aside class="side">
+<section class="card"><h2>Input Workspace</h2><p>Paste text directly, load/drop a local file, or explicitly fetch a remote webpage. Text-capable inputs are copied into the Scratch Pad and added to the session workspace automatically.</p>
+<div class="filebox" id="fileBox"><strong id="fileLabel">No local file loaded</strong><div class="filemeta" id="fileMeta">Choose one or more files or drag them onto the Scratch Pad. Files get session #id references.</div></div><div id="workspaceList" style="margin:8px 0;border:1px solid var(--line);border-radius:7px;background:#07111f;max-height:190px;overflow:auto"></div>
+<textarea id="scratch" placeholder="Paste input here, or drag/drop a local file..."></textarea>
+<div class="row" style="margin-top:7px"><input id="file" class="hidden" type="file"><button class="primary" id="loadFile">Choose Local File</button><button id="fetchWebpage">Fetch Webpage</button><button id="renderWebpage">Open + Capture Webpage</button><button id="clearFile">Clear File</button><button id="useLast">Use Last Output</button><button id="clearScratch">Clear Pad</button></div></section>
+<section class="card"><h2>Quick Commands</h2><div id="quick" class="quick"></div></section>
+<section class="card"><h2>Command Catalog</h2><p><strong id="count"></strong> commands registered in v0046. Search command names, descriptions, usage, or category.</p>
+<div class="catalog-tools"><input id="catalogSearch" autocomplete="off" placeholder="Search commands..."><select id="catalogCategory"><option value="">All categories</option></select></div>
+<div id="catalog" class="catalog"></div></section>
+</aside>
+</div>
+<footer><span>© <span id="year"></span> mikejamesgreco.me LLC. All rights reserved.</span><span>Single-file local-first toolbox · ordinary text/file processing stays in your browser; Fetch Webpage makes an explicit network request.</span></footer>
+</div>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),ui={out:$('output'),cmd:$('command'),run:$('run'),scratch:$('scratch'),status:$('status'),quick:$('quick'),catalog:$('catalog'),count:$('count'),file:$('file'),catalogSearch:$('catalogSearch'),catalogCategory:$('catalogCategory'),fileBox:$('fileBox'),fileLabel:$('fileLabel'),fileMeta:$('fileMeta'),workspaceList:$('workspaceList')};
+const hist=[];let hi=0,last='',workspaceFiles=[],nextFileId=1,activeFileId=null,lastSSH=null;const TE=new TextEncoder(),TD=new TextDecoder();
+const esc=s=>String(s).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+function print(c,r,type='ok',meta=''){let d=document.createElement('div');d.className='entry '+type;d.innerHTML=`<div><span class="prompt">TGTT&gt;</span> <span class="cmd">${esc(c)}</span></div><div class="result">${esc(r??'')}</div>${meta?`<div class="meta">${esc(meta)}</div>`:''}`;ui.out.appendChild(d);ui.out.scrollTop=ui.out.scrollHeight}
+function inputOf(inline){inline=(inline||'').trim();return inline||ui.scratch.value}
+function argsOf(s){let a=[],c='',q=null;for(let i=0;i<s.length;i++){let ch=s[i];if(q){if(ch===q)q=null;else c+=ch}else if(ch==='"'||ch==="'")q=ch;else if(/\s/.test(ch)){if(c){a.push(c);c=''}}else c+=ch}if(c)a.push(c);return a}
+function pipeSplit(s){let a=[],c='',q=null;for(let ch of s){if(q){if(ch===q)q=null;c+=ch}else if(ch==='"'||ch==="'"){q=ch;c+=ch}else if(ch==='|'){a.push(c.trim());c=''}else c+=ch}if(c.trim())a.push(c.trim());return a}
+
+function uniq(a){return [...new Set(a)]}
+function activeFile(){return workspaceFiles.find(f=>f.id===activeFileId)||null}
+
+
+
+let snapshotPdfJsCache=null;
+const SNAPSHOT_PDFJS_VERSION='4.2.67';
+const SNAPSHOT_PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.mjs';
+const SNAPSHOT_PDFJS_WORKER_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs';
+
+function snapshotTimestamp(d=new Date()){
+  const p=n=>String(n).padStart(2,'0');
+  const tzParts=new Intl.DateTimeFormat(undefined,{timeZoneName:'short'}).formatToParts(d);
+  const tz=(tzParts.find(x=>x.type==='timeZoneName')||{}).value||'Local';
+  const offsetMin=-d.getTimezoneOffset();
+  const sign=offsetMin>=0?'+':'-';
+  const abs=Math.abs(offsetMin),off=`${sign}${p(Math.floor(abs/60))}:${p(abs%60)}`;
+  const localIso=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}${off}`;
+  return {
+    display:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} ${tz} (24-hour)`,
+    compact:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} ${tz}`,
+    timezone:tz,
+    offset:off,
+    localIso,
+    file:`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`,
+    iso:d.toISOString()
+  };
+}
+function snapshotEsc(s){
+  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function bytesToBase64Chunked(bytes){
+  let out='',chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk)out+=String.fromCharCode(...bytes.subarray(i,i+chunk));
+  return btoa(out);
+}
+function textToBase64Utf8(text){
+  return bytesToBase64Chunked(TE.encode(String(text)));
+}
+async function snapshotFileBytes(f){
+  if(f?.file && typeof f.file.arrayBuffer==='function'){
+    return new Uint8Array(await f.file.arrayBuffer());
+  }
+  return TE.encode(f?.text||'');
+}
+function snapshotMime(f){
+  if(f?.type)return f.type;
+  const n=(f?.name||'').toLowerCase();
+  if(/\.html?$/.test(n))return'text/html';
+  if(/\.pdf$/.test(n))return'application/pdf';
+  if(/\.png$/.test(n))return'image/png';
+  if(/\.jpe?g$/.test(n))return'image/jpeg';
+  if(/\.gif$/.test(n))return'image/gif';
+  if(/\.webp$/.test(n))return'image/webp';
+  if(/\.svg$/.test(n))return'image/svg+xml';
+  if(/\.xml$/.test(n))return'application/xml';
+  if(/\.json$/.test(n))return'application/json';
+  if(/\.txt$|\.log$|\.sql$|\.csv$|\.md$|\.js$|\.css$|\.java$|\.pk[bs]$|\.pls$/.test(n))return'text/plain';
+  return'application/octet-stream';
+}
+async function snapshotLoadPdfJsSources(){
+  if(snapshotPdfJsCache)return snapshotPdfJsCache;
+  ui.status.textContent='Loading PDF renderer for snapshot…';
+  try{
+    const [libRes,workerRes]=await Promise.all([
+      fetch(SNAPSHOT_PDFJS_URL,{cache:'force-cache'}),
+      fetch(SNAPSHOT_PDFJS_WORKER_URL,{cache:'force-cache'})
+    ]);
+    if(!libRes.ok||!workerRes.ok)throw Error(`PDF.js download failed (${libRes.status}/${workerRes.status}).`);
+    const [lib,worker]=await Promise.all([libRes.text(),workerRes.text()]);
+    if(!lib.includes('getDocument')||worker.length<10000)throw Error('Downloaded PDF renderer did not look complete.');
+    snapshotPdfJsCache={lib,worker};
+    return snapshotPdfJsCache;
+  }catch(e){
+    throw Error(`Could not load the PDF snapshot renderer. TGTT v0046 downloads PDF.js ${SNAPSHOT_PDFJS_VERSION} once per browser session when creating a PDF snapshot, then embeds it into the exported HTML so that snapshot is self-contained. ${e.message||e}`);
+  }
+}
+function universalScreenCaptureCode(safeBase,stampFile,userNamed=false){
+  return `
+(()=>{
+  const btn=document.getElementById('tgttExportPng');
+  const msg=document.getElementById('tgttStatus');
+  if(!btn)return;
+  const setMsg=t=>{if(msg)msg.textContent=t||''};
+  btn.addEventListener('click',async()=>{
+    let stream=null;
+    const old=btn.textContent;
+    btn.disabled=true;
+    btn.textContent='Choose Capture…';
+    try{
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia)throw Error('Screen capture is unavailable in this browser.');
+      setMsg('Choose this tab, browser window, or screen.');
+      stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
+      const video=document.createElement('video');
+      video.srcObject=stream;video.muted=true;video.playsInline=true;
+      await video.play();await new Promise(r=>setTimeout(r,300));
+      const track=stream.getVideoTracks()[0],s=track.getSettings?track.getSettings():{};
+      const w=s.width||video.videoWidth||innerWidth,h=s.height||video.videoHeight||innerHeight;
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(video,0,0,w,h);
+      const blob=await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(Error('PNG encoding failed.')),'image/png'));
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=${JSON.stringify(safeBase+'-'+stampFile+'.png')};
+      a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);
+      setMsg('PNG saved.');
+    }catch(e){setMsg(e.message||String(e));alert('PNG export was not completed.\\n\\n'+(e.message||e))}
+    finally{if(stream)stream.getTracks().forEach(t=>t.stop());btn.disabled=false;btn.textContent=old}
+  });
+})();`;
+}
+async function buildPdfSnapshotHtml({name,bytes,stamp,safeBase,userNamed=false}){
+  const src=await snapshotLoadPdfJsSources();
+  const pdfB64=bytesToBase64Chunked(bytes);
+  const libB64=textToBase64Utf8(src.lib);
+  const workerB64=textToBase64Utf8(src.worker);
+
+  const appCode=`
+const PDF_B64=${JSON.stringify(pdfB64)};
+const PDFJS_LIB_B64=${JSON.stringify(libB64)};
+const PDFJS_WORKER_B64=${JSON.stringify(workerB64)};
+const SOURCE_NAME=${JSON.stringify(name)};
+const SNAPSHOT_DISPLAY=${JSON.stringify(stamp.display)};
+const SNAPSHOT_LOCAL_ISO=${JSON.stringify(stamp.localIso)};
+const SNAPSHOT_FILE=${JSON.stringify(stamp.file)};
+const OUTPUT_BASE=${JSON.stringify(safeBase)};
+const USER_NAMED=${JSON.stringify(userNamed)};
+const PDFJS_VERSION=${JSON.stringify(SNAPSHOT_PDFJS_VERSION)};
+
+const statusEl=document.getElementById('tgttStatus');
+const exportBtn=document.getElementById('tgttExportPng');
+const pagesEl=document.getElementById('pdfPages');
+const pageCountEl=document.getElementById('pageCount');
+const setStatus=t=>{statusEl.textContent=t||''};
+
+function b64Bytes(b64){
+  const bin=atob(b64),out=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);
+  return out;
+}
+function b64Text(b64){return new TextDecoder().decode(b64Bytes(b64))}
+function blobModuleUrl(source){
+  return URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
+}
+async function canvasBlob(canvas){
+  return new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('PNG encoding failed.')),'image/png'));
+}
+function downloadBlob(blob,name){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+async function renderPdf(){
+  setStatus('Loading embedded PDF renderer…');
+  const libUrl=blobModuleUrl(b64Text(PDFJS_LIB_B64));
+  const workerUrl=blobModuleUrl(b64Text(PDFJS_WORKER_B64));
+  let pdfjsLib;
+  try{
+    pdfjsLib=await import(libUrl);
+    pdfjsLib.GlobalWorkerOptions.workerSrc=workerUrl;
+    const task=pdfjsLib.getDocument({data:b64Bytes(PDF_B64),isEvalSupported:false});
+    const pdf=await task.promise;
+    pageCountEl.textContent=pdf.numPages+' page'+(pdf.numPages===1?'':'s');
+
+    const targetCssWidth=Math.min(1200,Math.max(700,window.innerWidth-72));
+    for(let n=1;n<=pdf.numPages;n++){
+      setStatus('Rendering page '+n+' of '+pdf.numPages+'…');
+      const page=await pdf.getPage(n);
+      const base=page.getViewport({scale:1});
+      const cssScale=targetCssWidth/base.width;
+      const renderScale=Math.max(cssScale,Math.min(cssScale*window.devicePixelRatio,cssScale*2));
+      const viewport=page.getViewport({scale:renderScale});
+
+      const card=document.createElement('section');
+      card.className='pdf-page';
+      card.dataset.page=String(n);
+
+      const label=document.createElement('div');
+      label.className='page-label';
+      label.textContent='Page '+n+' of '+pdf.numPages;
+
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.ceil(viewport.width);
+      canvas.height=Math.ceil(viewport.height);
+      canvas.style.width=Math.round(base.width*cssScale)+'px';
+      canvas.style.height=Math.round(base.height*cssScale)+'px';
+
+      card.appendChild(canvas);
+      card.appendChild(label);
+      pagesEl.appendChild(card);
+
+      await page.render({canvasContext:canvas.getContext('2d',{alpha:false}),viewport}).promise;
+      page.cleanup();
+    }
+    setStatus('Ready · all '+pdf.numPages+' PDF pages rendered locally.');
+    exportBtn.disabled=false;
+  }finally{
+    URL.revokeObjectURL(libUrl);
+    // workerUrl remains in use while PDF.js is alive; revoke on page unload.
+    addEventListener('unload',()=>URL.revokeObjectURL(workerUrl),{once:true});
+  }
+}
+async function exportWholePdf(){
+  const canvases=[...document.querySelectorAll('.pdf-page canvas')];
+  if(!canvases.length)throw Error('PDF pages are not rendered yet.');
+
+  exportBtn.disabled=true;
+  const old=exportBtn.textContent;
+  exportBtn.textContent='Building PNG…';
+  try{
+    const gap=20,header=92,pad=20;
+    const rawW=Math.max(...canvases.map(c=>c.width));
+    const rawPagesH=canvases.reduce((s,c)=>s+c.height,0)+gap*(canvases.length-1);
+    const rawWTotal=rawW+pad*2;
+    const rawHTotal=header+pad+rawPagesH+pad;
+
+    const maxDim=32000,maxPixels=120000000;
+    let scale=Math.min(1,maxDim/rawWTotal,maxDim/rawHTotal,Math.sqrt(maxPixels/(rawWTotal*rawHTotal)));
+    if(!isFinite(scale)||scale<=0)scale=1;
+
+    const out=document.createElement('canvas');
+    out.width=Math.max(1,Math.floor(rawWTotal*scale));
+    out.height=Math.max(1,Math.floor(rawHTotal*scale));
+    const ctx=out.getContext('2d',{alpha:false});
+    ctx.fillStyle='#2f2f2f';ctx.fillRect(0,0,out.width,out.height);
+
+    const S=v=>v*scale;
+    ctx.fillStyle='#07111f';ctx.fillRect(0,0,out.width,S(header));
+    ctx.fillStyle='#ffffff';
+    ctx.textBaseline='top';
+    if(USER_NAMED){
+      ctx.font=Math.max(12,S(20))+'px Consolas, monospace';
+      ctx.fillText(SOURCE_NAME,S(18),S(14));
+      ctx.font=Math.max(10,S(13))+'px Consolas, monospace';
+      ctx.fillStyle='#cbd5e1';
+      ctx.fillText('Snapshot: '+SNAPSHOT_DISPLAY,S(18),S(43));
+      ctx.font=Math.max(9,S(11))+'px Consolas, monospace';
+      ctx.fillStyle='#94a3b8';
+      ctx.fillText(SNAPSHOT_LOCAL_ISO,S(18),S(61));
+    }else{
+      ctx.font=Math.max(12,S(20))+'px Consolas, monospace';
+      ctx.fillText('Snapshot: '+SNAPSHOT_DISPLAY,S(18),S(14));
+      ctx.font=Math.max(10,S(13))+'px Consolas, monospace';
+      ctx.fillStyle='#cbd5e1';
+      ctx.fillText(SNAPSHOT_LOCAL_ISO,S(18),S(41));
+      ctx.font=Math.max(9,S(11))+'px Consolas, monospace';
+      ctx.fillStyle='#94a3b8';
+      ctx.fillText(SOURCE_NAME,S(18),S(59));
+    }
+
+    let y=header+pad;
+    for(let i=0;i<canvases.length;i++){
+      const c=canvases[i];
+      const x=pad+(rawW-c.width)/2;
+      ctx.fillStyle='#ffffff';
+      ctx.fillRect(S(x),S(y),S(c.width),S(c.height));
+      ctx.drawImage(c,S(x),S(y),S(c.width),S(c.height));
+      y+=c.height+gap;
+    }
+
+    const blob=await canvasBlob(out);
+    downloadBlob(blob,OUTPUT_BASE+'-'+SNAPSHOT_FILE+'.png');
+    setStatus('Full '+canvases.length+'-page PNG saved'+(scale<1?' at '+Math.round(scale*100)+'% scale to fit browser canvas limits.':'.'));
+  }finally{
+    exportBtn.textContent=old;
+    exportBtn.disabled=false;
+  }
+}
+exportBtn.addEventListener('click',()=>exportWholePdf().catch(e=>{setStatus(e.message||String(e));alert('PNG export failed.\\n\\n'+(e.message||e))}));
+renderPdf().catch(e=>{setStatus('PDF render failed: '+(e.message||e));console.error(e)});
+`;
+
+  const moduleTag='<scr'+'ipt type="module">'+appCode+'</scr'+'ipt>';
+
+  return `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="tgtt-snapshot-created" content="${snapshotEsc(stamp.iso)}">
+<meta name="tgtt-snapshot-local" content="${snapshotEsc(stamp.localIso)}">
+<meta name="tgtt-snapshot-timezone" content="${snapshotEsc(stamp.timezone)}">
+<meta name="tgtt-snapshot-offset" content="${snapshotEsc(stamp.offset)}">
+<meta name="tgtt-pdfjs-version" content="${snapshotEsc(SNAPSHOT_PDFJS_VERSION)}">
+<title>${snapshotEsc(name)} — TGTT PDF Snapshot</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#2f2f2f;color:#fff;font-family:Segoe UI,Arial,sans-serif}
+#tgttBar{
+  position:sticky;top:0;z-index:9999;min-height:62px;display:flex;align-items:center;gap:12px;
+  padding:9px 14px;background:#07111f;border-bottom:1px solid #334155;box-shadow:0 2px 12px rgba(0,0,0,.45)
+}
+#tgttExportPng{
+  appearance:none;border:2px solid #fff;border-radius:7px;background:#111827;color:#fff;
+  padding:9px 14px;font:700 14px/1.2 Consolas,'Courier New',monospace;cursor:pointer
+}
+#tgttExportPng:hover{background:#1f2937}
+#tgttExportPng:disabled{opacity:.55;cursor:wait}
+#tgttStatus{font-size:12px;color:#cbd5e1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tgttStamp{margin-left:auto;text-align:right;white-space:nowrap;font:700 13px/1.25 Consolas,'Courier New',monospace}
+#tgttStamp span{font-size:11px;color:#cbd5e1;font-weight:400}
+#pageCount{font-size:12px;color:#94a3b8}
+#pdfPages{padding:24px 18px 40px;display:flex;flex-direction:column;align-items:center;gap:22px}
+.pdf-page{position:relative;background:#fff;box-shadow:0 3px 16px rgba(0,0,0,.5);max-width:100%}
+.pdf-page canvas{display:block;max-width:100%;height:auto;background:#fff}
+.page-label{
+  position:absolute;right:8px;bottom:8px;padding:3px 7px;border-radius:4px;
+  background:rgba(7,17,31,.78);color:#fff;font:11px/1.2 Consolas,monospace;pointer-events:none
+}
+#about{padding:0 18px 18px;text-align:center;color:#94a3b8;font-size:11px}
+</style>
+</head>
+<body>
+<div id="tgttBar">
+  <button id="tgttExportPng" type="button" disabled>Export Full PDF PNG</button>
+  <div><div id="tgttStatus">Preparing PDF renderer…</div><div id="pageCount"></div></div>
+  <div id="tgttStamp">Snapshot: ${snapshotEsc(stamp.display)}<br><span>${snapshotEsc(stamp.localIso)}</span><br><span>${snapshotEsc(name)}</span></div>
+</div>
+<main id="pdfPages"></main>
+<div id="about">Rendered by TGTT using embedded PDF.js ${snapshotEsc(SNAPSHOT_PDFJS_VERSION)} · no browser PDF annotation toolbar.</div>
+${moduleTag}
+</body>
+</html>`;
+}
+async function buildSnapshotFile(f,outputBase=''){
+  if(!f)throw Error('Load a document first or provide #id/filename.');
+
+  const stamp=snapshotTimestamp();
+  const name=f.name||`document-${stamp.file}`;
+  const mime=snapshotMime(f);
+  const bytes=await snapshotFileBytes(f);
+  const suppliedBase=String(outputBase||'').trim();
+  const sourceExt=((name.match(/(\.[A-Za-z0-9]{1,12})$/)||[])[1]||'');
+  const suppliedHasExt=/\.[A-Za-z0-9]{1,12}$/.test(suppliedBase);
+  const requestedName=suppliedBase
+    ? (suppliedHasExt?suppliedBase:suppliedBase+sourceExt)
+    : name;
+  const displayName=requestedName;
+  const safeDisplayName=displayName
+    .replace(/[<>:"/\\|?*\x00-\x1f]+/g,'_').trim()||'snapshot';
+  const exportBase=safeDisplayName.replace(/\.[^.]+$/,'')||'snapshot';
+  // Stage 1 HTML always uses .html, but its base and visible snapshot label come from
+  // the user name (inheriting the uploaded extension when omitted) or the source name.
+  const outName=suppliedBase?`${exportBase}.html`:`${exportBase}-snapshot-${stamp.file}.html`;
+  const lower=name.toLowerCase();
+
+  let html='';
+  if(mime==='application/pdf'||/\.pdf$/.test(lower)){
+    html=await buildPdfSnapshotHtml({name:displayName,bytes,stamp,safeBase:exportBase,userNamed:!!suppliedBase});
+  }else{
+    const b64=bytesToBase64Chunked(bytes);
+    const dataUri=`data:${mime};base64,${b64}`;
+    let viewer='';
+    if(/^image\//i.test(mime)){
+      viewer=`<div class="image-stage"><img src="${dataUri}" alt="${snapshotEsc(displayName)}"></div>`;
+    }else if(/^text\/html$/i.test(mime)||/\.html?$/.test(lower)){
+      viewer=`<iframe id="snapshotViewer" title="${snapshotEsc(displayName)}" src="${dataUri}"></iframe>`;
+    }else if(/^text\//i.test(mime)||/(json|xml|javascript)/i.test(mime)){
+      viewer=`<iframe id="snapshotViewer" title="${snapshotEsc(displayName)}" src="${dataUri}"></iframe>`;
+    }else{
+      viewer=`<object id="snapshotViewer" data="${dataUri}" type="${snapshotEsc(mime)}">
+        <div class="fallback"><h2>The browser could not render this file type inline.</h2>
+        <p>${snapshotEsc(displayName)} · ${snapshotEsc(mime)}</p>
+        <a href="${dataUri}" download="${snapshotEsc(displayName)}">Open / save embedded file</a></div>
+      </object>`;
+    }
+
+    const exportCode=universalScreenCaptureCode(exportBase,stamp.file,!!suppliedBase);
+    const scriptTag='<scr'+'ipt>'+exportCode+'</scr'+'ipt>';
+    html=`<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="tgtt-snapshot-created" content="${snapshotEsc(stamp.iso)}">
+<meta name="tgtt-snapshot-local" content="${snapshotEsc(stamp.localIso)}">
+<meta name="tgtt-snapshot-timezone" content="${snapshotEsc(stamp.timezone)}">
+<meta name="tgtt-snapshot-offset" content="${snapshotEsc(stamp.offset)}">
+<title>${snapshotEsc(name)} — TGTT Snapshot</title>
+<style>
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;background:#111827;color:#fff;font-family:Segoe UI,Arial,sans-serif;overflow:hidden}
+#tgttBar{position:fixed;left:0;right:0;top:0;height:58px;z-index:9999;display:flex;align-items:center;gap:10px;padding:8px 12px;background:#07111f;border-bottom:1px solid #334155}
+#tgttExportPng{border:2px solid #fff;border-radius:7px;background:#111827;color:#fff;padding:8px 13px;font:700 14px/1.2 Consolas,monospace;cursor:pointer}
+#tgttStatus{font-size:12px;color:#cbd5e1}
+#tgttStamp{margin-left:auto;text-align:right;white-space:nowrap;font:700 13px/1.25 Consolas,monospace}
+#tgttStamp span{font-size:11px;color:#cbd5e1;font-weight:400}
+#stage{position:fixed;left:0;right:0;top:58px;bottom:0;background:#fff}
+#snapshotViewer,#stage>object{display:block;width:100%;height:100%;border:0;background:#fff}
+.image-stage{width:100%;height:100%;overflow:auto;background:#111827;text-align:center}.image-stage img{display:block;max-width:100%;height:auto;margin:0 auto}
+.fallback{padding:32px;color:#111827;background:#fff;height:100%}.fallback a{color:#0369a1}
+</style>
+</head>
+<body>
+<div id="tgttBar"><button id="tgttExportPng" type="button">Export PNG</button><div id="tgttStatus">Capture this rendered snapshot with the browser.</div><div id="tgttStamp">Snapshot: ${snapshotEsc(stamp.display)}<br><span>${snapshotEsc(stamp.localIso)}</span><br><span>${snapshotEsc(displayName)}</span></div></div>
+<div id="stage">${viewer}</div>
+${scriptTag}
+</body></html>`;
+  }
+
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=outName;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  return {outName,stamp,source:name,displayName,mime,pdf:mime==='application/pdf'||/\.pdf$/.test(lower),userNamed:!!suppliedBase};
+}
+
+function fileLabel(f){return `#${f.id} ${f.name}`}
+function resolveFileRef(token){
+  if(!token)return activeFile();
+  token=String(token).trim();
+  if(token==='*')return workspaceFiles.slice();
+  if(/^#\d+$/.test(token))return workspaceFiles.find(f=>f.id===Number(token.slice(1)))||null;
+  let exact=workspaceFiles.filter(f=>f.name.toLowerCase()===token.toLowerCase());
+  if(exact.length===1)return exact[0];
+  if(exact.length>1)throw Error('Multiple files share that name; use #id.');
+  let partial=workspaceFiles.filter(f=>f.name.toLowerCase().includes(token.toLowerCase()));
+  if(partial.length===1)return partial[0];
+  if(partial.length>1)throw Error('Multiple filenames match; use #id.');
+  return null;
+}
+
+function resolveTextSource(args,input){
+  let a=[...args],ref='';
+  if(a.length){
+    const last=a[a.length-1];
+    if(/^#\d+$/.test(last)||workspaceFiles.some(f=>f.name.toLowerCase()===String(last).toLowerCase())){
+      ref=a.pop();
+    }
+  }
+  if(ref){
+    const f=resolveFileRef(ref);if(!f||Array.isArray(f))throw Error('File not found.');
+    return {args:a,text:f.text,file:f,label:fileLabel(f)};
+  }
+  return {args:a,text:input,file:null,label:'scratch pad'};
+}
+
+function resolveTwoFiles(a){
+  if(a.length<2)throw Error('Provide two file references, e.g. #1 #2.');
+  const left=resolveFileRef(a[0]),right=resolveFileRef(a[1]);
+  if(!left||Array.isArray(left)||!right||Array.isArray(right))throw Error('Could not resolve both files.');
+  return {left,right};
+}
+
+function numberedLines(text,start=1){
+  return lines(text).map((x,i)=>`${String(i+start).padStart(6)}: ${x}`).join('\n');
+}
+function matchLineLabel(src,lineNo){
+  return src.file?`${src.label}:${lineNo}`:`${lineNo}`;
+}
+
+
+function b64uBytes(s){
+  s=String(s).replace(/-/g,'+').replace(/_/g,'/');s+='='.repeat((4-s.length%4)%4);
+  const raw=atob(s),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out;
+}
+function concatBytes(...parts){const len=parts.reduce((n,p)=>n+p.length,0),out=new Uint8Array(len);let o=0;for(const p of parts){out.set(p,o);o+=p.length}return out}
+function u32(n){return new Uint8Array([(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255])}
+function sshString(v){const b=typeof v==='string'?TE.encode(v):v;return concatBytes(u32(b.length),b)}
+function mpintBytes(b){b=new Uint8Array(b);let i=0;while(i<b.length-1&&b[i]===0)i++;b=b.slice(i);if(b.length&&b[0]&0x80)b=concatBytes(new Uint8Array([0]),b);return sshString(b)}
+function bytesToB64(b){let s='',step=0x8000;for(let i=0;i<b.length;i+=step)s+=String.fromCharCode(...b.subarray(i,i+step));return btoa(s)}
+function pemBlock(label,bytes){const b=bytesToB64(bytes),a=[];for(let i=0;i<b.length;i+=70)a.push(b.slice(i,i+70));return `-----BEGIN ${label}-----\n${a.join('\n')}\n-----END ${label}-----`}
+function randomU32(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]>>>0}
+function openSSHPublicBlobFromJWK(jwk){
+  if(jwk.kty==='OKP'&&jwk.crv==='Ed25519')return concatBytes(sshString('ssh-ed25519'),sshString(b64uBytes(jwk.x)));
+  if(jwk.kty==='RSA')return concatBytes(sshString('ssh-rsa'),mpintBytes(b64uBytes(jwk.e)),mpintBytes(b64uBytes(jwk.n)));
+  throw Error('Unsupported SSH key type.');
+}
+function openSSHPrivateFromJWK(jwk,comment='tgtt-generated'){
+  const pub=openSSHPublicBlobFromJWK(jwk),check=randomU32();let body=concatBytes(u32(check),u32(check));
+  if(jwk.kty==='OKP'&&jwk.crv==='Ed25519'){
+    const x=b64uBytes(jwk.x),d=b64uBytes(jwk.d);
+    body=concatBytes(body,sshString('ssh-ed25519'),sshString(x),sshString(concatBytes(d,x)),sshString(comment));
+  }else if(jwk.kty==='RSA'){
+    body=concatBytes(body,sshString('ssh-rsa'),mpintBytes(b64uBytes(jwk.n)),mpintBytes(b64uBytes(jwk.e)),mpintBytes(b64uBytes(jwk.d)),
+      mpintBytes(b64uBytes(jwk.qi)),mpintBytes(b64uBytes(jwk.p)),mpintBytes(b64uBytes(jwk.q)),sshString(comment));
+  }else throw Error('Unsupported SSH key type.');
+  let pad=1;while(body.length%8)body=concatBytes(body,new Uint8Array([pad++]));
+  const all=concatBytes(TE.encode('openssh-key-v1\0'),sshString('none'),sshString('none'),sshString(new Uint8Array()),u32(1),sshString(pub),sshString(body));
+  return pemBlock('OPENSSH PRIVATE KEY',all);
+}
+async function sshFingerprintFromBlob(blob){const d=new Uint8Array(await crypto.subtle.digest('SHA-256',blob));return 'SHA256:'+bytesToB64(d).replace(/=+$/,'')}
+function parseOpenSSHPublic(text){
+  const line=String(text).trim().split(/\r?\n/).find(x=>/^(ssh-ed25519|ssh-rsa)\s+/.test(x.trim()));
+  if(!line)throw Error('Expected an OpenSSH public key such as ssh-ed25519 AAAA... comment');
+  const p=line.trim().split(/\s+/),type=p[0],blob=b64uBytes(p[1]),comment=p.slice(2).join(' ');
+  return {type,blob,comment,line:line.trim()};
+}
+async function generateSSH(kind,bits=4096,comment='tgtt-generated'){
+  let pair,jwk;
+  if(kind==='ed25519'){
+    try{pair=await crypto.subtle.generateKey({name:'Ed25519'},true,['sign','verify'])}
+    catch(e){throw Error('Ed25519 is not supported by this browser/Web Crypto implementation. Try: sshkey rsa 4096')}
+  }else if(kind==='rsa'){
+    bits=Math.max(2048,Math.min(8192,Number(bits)||4096));
+    pair=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:bits,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+  }else throw Error('Use: sshkey ed25519 [comment] OR sshkey rsa [bits] [comment]');
+  jwk=await crypto.subtle.exportKey('jwk',pair.privateKey);
+  const blob=openSSHPublicBlobFromJWK(jwk),publicKey=`${jwk.kty==='RSA'?'ssh-rsa':'ssh-ed25519'} ${bytesToB64(blob)} ${comment}`.trim();
+  const privateKey=openSSHPrivateFromJWK(jwk,comment),fingerprint=await sshFingerprintFromBlob(blob);
+  return {kind:jwk.kty==='RSA'?'rsa':'ed25519',bits,comment,publicKey,privateKey,fingerprint};
+}
+
+function renderWorkspace(){
+  ui.workspaceList.innerHTML='';
+  if(!workspaceFiles.length){ui.workspaceList.innerHTML='<div style="padding:7px;color:var(--muted);font-size:10px">No files loaded.</div>';return}
+  for(const f of workspaceFiles){
+    let d=document.createElement('div');
+    d.style.cssText='padding:7px 8px;border-bottom:1px solid #1d2939;font-size:10px;cursor:pointer'+(f.id===activeFileId?';background:#10223a':'');
+    d.innerHTML=`<b style="color:#93c5fd">#${f.id}</b> <span style="color:#d7e2f0">${esc(f.name)}</span> <span style="color:var(--muted)">· ${human(f.size)}</span>${f.id===activeFileId?' <span style="color:#86efac">ACTIVE</span>':''}`;
+    d.onclick=()=>{activeFileId=f.id;ui.scratch.value=f.text;refreshFileBox();renderWorkspace();ui.status.textContent=`Active ${fileLabel(f)}`};
+    ui.workspaceList.appendChild(d);
+  }
+}
+function refreshFileBox(){
+  let f=activeFile();
+  if(!f){ui.fileLabel.textContent='No active workspace file';ui.fileMeta.textContent=workspaceFiles.length?`${workspaceFiles.length} files loaded. Use files or use #id.`:'Choose one or more files or drag them onto the Scratch Pad.';return}
+  ui.fileLabel.textContent=`Active ${fileLabel(f)}`;
+  ui.fileMeta.textContent=f.remoteUrl?`${human(f.size)} · ${f.type||'type unknown'} · ${f.redirected?'redirected · ':''}credentials ${f.fetchCredentials||'omit'} · ${f.remoteUrl}`:`${human(f.size)} · ${f.type||'type unknown'} · modified ${new Date(f.lastModified).toLocaleString()}`;
+}
+async function addFiles(list){
+  let added=[];
+  for(const f of Array.from(list||[])){let text='';try{text=await f.text()}catch{}let r={id:nextFileId++,name:f.name,size:f.size,type:f.type,lastModified:f.lastModified,text,file:f};workspaceFiles.push(r);added.push(r)}
+  if(added.length){activeFileId=added[0].id;ui.scratch.value=added[0].text;ui.status.textContent=`Loaded ${added.length} file(s) · active ${fileLabel(added[0])}`}
+  refreshFileBox();renderWorkspace();
+}
+
+function normalizeWebUrl(raw){
+  raw=String(raw||'').trim();
+  if(!raw)throw Error('Provide a webpage URL.');
+
+  // Remove one layer of wrapping quotes.
+  if((raw.startsWith('"')&&raw.endsWith('"'))||(raw.startsWith("'")&&raw.endsWith("'"))){
+    raw=raw.slice(1,-1).trim();
+  }
+
+  // Prefer the destination URL from Markdown syntax: [label](https://target).
+  // This is intentionally permissive because copied chat/UI text can contain
+  // whitespace or other characters that make a strict full-string regex brittle.
+  const mdTarget=raw.match(/\]\(\s*(https?:\/\/[^)\s]+)\s*\)/i);
+  if(mdTarget){
+    raw=mdTarget[1];
+  }else{
+    // Otherwise accept any first http(s) URL embedded in pasted text.
+    const anyUrl=raw.match(/https?:\/\/[^\s<>"'\])]+/i);
+    if(anyUrl)raw=anyUrl[0];
+  }
+
+  // Trim common trailing punctuation copied from prose/chat.
+  raw=raw.replace(/[.,;:!?]+$/,'');
+
+  if(!/^[a-z][a-z0-9+.-]*:\/\//i.test(raw))raw='https://'+raw;
+
+  let u;
+  try{u=new URL(raw)}
+  catch{throw Error(`Invalid webpage URL after normalization: ${raw}`)}
+
+  if(!/^https?:$/.test(u.protocol))throw Error('Only http:// and https:// webpages can be fetched.');
+  return u.href;
+}
+function remotePageFilename(url,contentType=''){
+  const u=new URL(url);
+  let leaf=decodeURIComponent((u.pathname.split('/').filter(Boolean).pop()||'index'));
+  leaf=leaf.replace(/[<>:"/\\|?*\x00-\x1f]+/g,'_').trim()||'index';
+  if(!/\.[A-Za-z0-9]{1,12}$/.test(leaf))leaf+='.html';
+  if(/html/i.test(contentType)&&!/\.(html?|xhtml)$/i.test(leaf))leaf=leaf.replace(/\.[^.]+$/,'')+'.html';
+  return `${u.hostname}-${leaf}`;
+}
+function addBaseHref(html,url){
+  const tag=`<base href="${String(url).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}">`;
+  if(/<base\b/i.test(html))return html;
+  if(/<head\b[^>]*>/i.test(html))return html.replace(/<head\b[^>]*>/i,m=>m+tag);
+  if(/<html\b[^>]*>/i.test(html))return html.replace(/<html\b[^>]*>/i,m=>m+'<head>'+tag+'</head>');
+  return '<!doctype html><html><head>'+tag+'</head><body>'+html+'</body></html>';
+}
+async function fetchWebpageIntoWorkspace(rawUrl){
+  const url=normalizeWebUrl(rawUrl);
+  ui.status.textContent=`Fetching ${url} …`;
+  let res;
+  try{
+    res=await fetch(url,{method:'GET',mode:'cors',credentials:'include',redirect:'follow',cache:'no-store'});
+  }catch(e){
+    throw Error(`Webpage fetch failed for: ${url}\n\nThe remote site may block browser cross-origin (CORS) access, authentication may be required, or the network request may be unavailable. TGTT does not use a proxy. If you use a CORS-unblocking browser extension, enable it for this page and retry.\n\n${e.message||e}`);
+  }
+  if(!res.ok)throw Error(`Webpage fetch returned HTTP ${res.status} ${res.statusText||''}`.trim());
+  const contentType=res.headers.get('content-type')||'text/html';
+  const finalUrl=res.url||url;
+  let text=await res.text();
+  if(/html|xhtml/i.test(contentType)||/<html[\s>]/i.test(text)||/<!doctype\s+html/i.test(text)){
+    text=addBaseHref(text,finalUrl);
+  }
+  const name=remotePageFilename(finalUrl,contentType);
+  const r={
+    id:nextFileId++,
+    name,
+    size:TE.encode(text).length,
+    type:/html|xhtml/i.test(contentType)?'text/html':contentType.split(';')[0]||'text/plain',
+    lastModified:Date.now(),
+    text,
+    file:null,
+    remoteUrl:finalUrl,
+    requestedUrl:url,
+    redirected:res.redirected||finalUrl!==url,
+    fetchCredentials:'include'
+  };
+  workspaceFiles.push(r);
+  activeFileId=r.id;
+  ui.scratch.value=text;
+  ui.status.textContent=`Fetched ${finalUrl} · active ${fileLabel(r)}`;
+  refreshFileBox();renderWorkspace();
+  return r;
+}
+const lines=s=>String(s).replace(/\r/g,'').split('\n'),unq=s=>{s=(s||'').trim();return((s[0]==='"'&&s.at(-1)==='"')||(s[0]==="'"&&s.at(-1)==="'"))?s.slice(1,-1):s};
+const human=n=>{n=Number(n);if(!Number.isFinite(n))return'Invalid number';let u=['B','KB','MB','GB','TB','PB'],i=0;while(Math.abs(n)>=1024&&i<u.length-1){n/=1024;i++}return`${n.toFixed(i?2:0)} ${u[i]}`};
+const hex=b=>[...b].map(x=>x.toString(16).padStart(2,'0')).join('');async function hash(algo,data){let b=data instanceof Uint8Array?data:TE.encode(String(data));return hex(new Uint8Array(await crypto.subtle.digest(algo,b)))}
+function parseCSV(t,d=','){let rows=[],row=[],f='',q=false;for(let i=0;i<t.length;i++){let c=t[i];if(q){if(c==='"'&&t[i+1]==='"'){f+='"';i++}else if(c==='"')q=false;else f+=c}else if(c==='"')q=true;else if(c===d){row.push(f);f=''}else if(c==='\n'){row.push(f);rows.push(row);row=[];f=''}else if(c!=='\r')f+=c}row.push(f);if(row.length>1||row[0]!==''||!rows.length)rows.push(row);return rows}
+const csvEsc=v=>{v=String(v??'');return/[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+function flatten(o,p='',r={}){if(o&&typeof o==='object'){if(Array.isArray(o))o.forEach((v,i)=>flatten(v,`${p}[${i}]`,r));else Object.entries(o).forEach(([k,v])=>flatten(v,p?`${p}.${k}`:k,r))}else r[p]=o;return r}
+function calc(e){if(!/^[0-9+\-*/%().,\sEe]+$/.test(e))throw Error('Only numeric arithmetic is allowed.');let v=Function(`"use strict";return (${e.replace(/,/g,'')})`)();if(typeof v!=='number'||!Number.isFinite(v))throw Error('Non-finite result.');return v}
+const b64e=s=>{let b=TE.encode(s),x='';for(let v of b)x+=String.fromCharCode(v);return btoa(x)},b64d=s=>{let x=atob(s.trim()),b=Uint8Array.from(x,c=>c.charCodeAt(0));return TD.decode(b)};
+function rFrom(s,flags='g'){let m=s.match(/^\/(.*)\/([dgimsuvy]*)$/);return m?new RegExp(m[1],m[2]||flags):new RegExp(s,flags)}
+function dateOf(s){if(!s)return new Date();if(/^\d{10}$/.test(s))return new Date(+s*1000);if(/^\d{13}$/.test(s))return new Date(+s);return new Date(s)}
+function dateFmt(d){return isNaN(d)?'Invalid date':`${d.toLocaleString()}\n${d.toISOString()}`}
+function typeDetect(s){let t=s.trim();if(!t)return'empty';try{JSON.parse(t);return'JSON'}catch{}if(/^<\?xml|^<[\w:-]+[\s>]/.test(t))return'XML/HTML-like';let L=lines(t).filter(Boolean).slice(0,5);if(L.length>1){let c=L.map(x=>(x.match(/,/g)||[]).length);if(new Set(c).size===1&&c[0])return'CSV-like'}if(/\b(select|insert|update|delete|merge|create|alter)\b/i.test(t))return'SQL-like';return'plain text'}
+function sqlFmt(s){let x=s.replace(/\s+/g,' ').trim();['SELECT','FROM','WHERE','GROUP BY','ORDER BY','HAVING','UNION ALL','UNION','LEFT JOIN','RIGHT JOIN','INNER JOIN','JOIN','ON','AND','OR','VALUES','SET'].forEach(k=>x=x.replace(new RegExp(`\\b${k.replace(' ','\\s+')}\\b`,'ig'),k));x=x.replace(/\s+(FROM|WHERE|GROUP BY|ORDER BY|HAVING|UNION ALL|UNION|LEFT JOIN|RIGHT JOIN|INNER JOIN|JOIN|VALUES|SET)\s+/g,'\n$1 ').replace(/\s+(AND|OR)\s+/g,'\n  $1 ');return x}
+function xmlPretty(x){x=x.replace(/>\s*</g,'><').trim();let p=0,o='';for(let n of x.split(/(?=<)|(?<=>)/).filter(Boolean)){if(/^<\//.test(n))p=Math.max(0,p-1);o+='  '.repeat(p)+n.trim()+'\n';if(/^<[^!?/][^>]*[^/]?>$/.test(n)&&!/^<.*<\//.test(n))p++}return o.trim()}
+function pathGet(o,p){if(!p||p==='$')return o;for(let t of p.replace(/^\$/,'').replace(/\[(\d+)\]/g,'.$1').split('.').filter(Boolean)){if(o==null)return undefined;o=o[t]}return o}
+
+
+function schemaTypeOf(v){if(v===null)return'null';if(Array.isArray(v))return'array';if(Number.isInteger(v))return'integer';if(typeof v==='number')return'number';return typeof v}
+function mergeSchemaTypes(a,b){
+  const ta=Array.isArray(a.type)?a.type:[a.type],tb=Array.isArray(b.type)?b.type:[b.type],types=uniq([...ta,...tb].filter(Boolean)),o={type:types.length===1?types[0]:types};
+  if(types.includes('object')&&a.properties&&b.properties){
+    o.properties={...a.properties};for(const[k,v]of Object.entries(b.properties))o.properties[k]=o.properties[k]?mergeSchemaTypes(o.properties[k],v):v;
+    const ra=new Set(a.required||[]),rb=new Set(b.required||[]),r=[...ra].filter(x=>rb.has(x));if(r.length)o.required=r;o.additionalProperties=true;
+  }
+  if(types.includes('array')&&a.items&&b.items)o.items=mergeSchemaTypes(a.items,b.items);return o;
+}
+function inferJSONSchema(v){
+  const t=schemaTypeOf(v);
+  if(t==='object'){const p={};for(const[k,x]of Object.entries(v))p[k]=inferJSONSchema(x);const s={type:'object',properties:p,additionalProperties:true},r=Object.keys(v);if(r.length)s.required=r;return s}
+  if(t==='array'){if(!v.length)return{type:'array',items:{}};let item=inferJSONSchema(v[0]);for(let i=1;i<v.length;i++)item=mergeSchemaTypes(item,inferJSONSchema(v[i]));return{type:'array',items:item}}
+  return{type:t};
+}
+function draft6Schema(v,title='Generated Schema'){return{$schema:'http://json-schema.org/draft-06/schema#',title,...inferJSONSchema(v)}}
+
+function schemaPaths(s,path='$',out=[],defs=null,seen=new Set()){
+  if(!s||typeof s!=='object')return out;
+  defs=defs||s.definitions||s.$defs||{};
+  if(s.$ref&&/^#\/(definitions|\$defs)\//.test(s.$ref)){
+    const key=s.$ref.split('/').slice(2).map(x=>x.replace(/~1/g,'/').replace(/~0/g,'~')).join('/');
+    const ref=(s.$ref.startsWith('#/$defs/')?(s.$defs||defs):(s.definitions||defs))[key]||defs[key];
+    const mark=s.$ref+'@'+path;if(ref&&!seen.has(mark)){seen.add(mark);schemaPaths(ref,path,out,defs,seen)}return out;
+  }
+  const type=Array.isArray(s.type)?s.type.join('|'):(s.type||((s.properties||s.required)?'object':s.items?'array':'any'));
+  out.push({path,type,required:false});
+  if(s.properties){
+    const req=new Set(s.required||[]);
+    for(const[k,v]of Object.entries(s.properties)){
+      const p=`${path}.${k}`,before=out.length;
+      schemaPaths(v,p,out,defs,seen);
+      if(out[before])out[before].required=req.has(k);
+    }
+  }
+  if(s.items)schemaPaths(s.items,`${path}[]`,out,defs,seen);
+  for(const key of ['allOf','anyOf','oneOf'])if(Array.isArray(s[key]))s[key].forEach((v,i)=>schemaPaths(v,`${path}{${key}:${i+1}}`,out,defs,new Set(seen)));
+  return out;
+}
+function schemaSummary(s,path='$',out=[]){const t=Array.isArray(s.type)?s.type.join('|'):(s.type||'any');out.push(`${path} : ${t}`);if(s.properties)for(const[k,v]of Object.entries(s.properties))schemaSummary(v,`${path}.${k}`,out);if(s.items)schemaSummary(s.items,`${path}[]`,out);return out}
+function validateDraft6Basic(s,v,path='$',errs=[]){
+  if(!s||typeof s!=='object')return errs;const types=s.type===undefined?[]:(Array.isArray(s.type)?s.type:[s.type]);
+  if(types.length){const a=schemaTypeOf(v),ok=types.includes(a)||(a==='integer'&&types.includes('number'));if(!ok){errs.push(`${path}: expected ${types.join('|')}, got ${a}`);return errs}}
+  if(s.enum&&!s.enum.some(x=>JSON.stringify(x)===JSON.stringify(v)))errs.push(`${path}: value not in enum`);
+  if(typeof v==='string'){if(s.minLength!==undefined&&v.length<s.minLength)errs.push(`${path}: shorter than minLength ${s.minLength}`);if(s.maxLength!==undefined&&v.length>s.maxLength)errs.push(`${path}: longer than maxLength ${s.maxLength}`);if(s.pattern){try{if(!(new RegExp(s.pattern)).test(v))errs.push(`${path}: does not match pattern`)}catch{}}}
+  if(typeof v==='number'){if(s.minimum!==undefined&&v<s.minimum)errs.push(`${path}: below minimum ${s.minimum}`);if(s.maximum!==undefined&&v>s.maximum)errs.push(`${path}: above maximum ${s.maximum}`)}
+  if(Array.isArray(v)){if(s.items)v.forEach((x,i)=>validateDraft6Basic(s.items,x,`${path}[${i}]`,errs))}
+  if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k of s.required||[])if(!(k in v))errs.push(`${path}: missing required property ${k}`);if(s.properties)for(const[k,x]of Object.entries(s.properties))if(k in v)validateDraft6Basic(x,v[k],`${path}.${k}`,errs)}
+  return errs;
+}
+function xmlLocalName(n){return(n.localName||n.nodeName||'').replace(/^.*:/,'')}
+function xsdPrimitive(type){type=String(type||'').replace(/^.*:/,'').toLowerCase();const m={string:{type:'string'},normalizedstring:{type:'string'},token:{type:'string'},date:{type:'string',format:'date'},datetime:{type:'string',format:'date-time'},time:{type:'string'},boolean:{type:'boolean'},decimal:{type:'number'},double:{type:'number'},float:{type:'number'},integer:{type:'integer'},int:{type:'integer'},long:{type:'integer'},short:{type:'integer'},nonnegativeinteger:{type:'integer',minimum:0},positiveinteger:{type:'integer',minimum:1},anyuri:{type:'string',format:'uri'},base64binary:{type:'string',contentEncoding:'base64'}};return m[type]||{type:'string'}}
+function childrenByLocal(n,name){return[...n.children].filter(x=>!name||xmlLocalName(x)===name)}
+function xsdSimpleToSchema(st){const r=childrenByLocal(st,'restriction')[0];if(!r)return{type:'string'};const s=xsdPrimitive(r.getAttribute('base')),en=childrenByLocal(r,'enumeration').map(x=>x.getAttribute('value'));if(en.length)s.enum=en;const p=childrenByLocal(r,'pattern')[0];if(p)s.pattern=p.getAttribute('value');return s}
+function xsdComplexToSchema(ct,types){
+  const s={type:'object',properties:{},additionalProperties:true},req=[];const seq=[...ct.getElementsByTagName('*')].find(x=>['sequence','all','choice'].includes(xmlLocalName(x)));
+  if(seq)for(const el of childrenByLocal(seq,'element')){const name=(el.getAttribute('name')||el.getAttribute('ref')||'value').replace(/^.*:/,'');s.properties[name]=xsdElementToSchema(el,types);if((el.getAttribute('minOccurs')||'1')!=='0')req.push(name)}
+  if(req.length)s.required=req;return s;
+}
+function xsdElementToSchema(el,types){
+  const type=el.getAttribute('type'),ref=el.getAttribute('ref');let s;
+  if(type){const key=type.replace(/^.*:/,'');s=types[key]?JSON.parse(JSON.stringify(types[key])):xsdPrimitive(type)}
+  else{const ct=childrenByLocal(el,'complexType')[0],st=childrenByLocal(el,'simpleType')[0];s=ct?xsdComplexToSchema(ct,types):st?xsdSimpleToSchema(st):{type:'string'}}
+  const max=el.getAttribute('maxOccurs');if(max&&max!=='1')s={type:'array',items:s};if(ref)s.description=`XSD ref: ${ref}`;return s;
+}
+function xsdToJSONSchema(text,title='XSD Schema'){
+  if(typeof DOMParser==='undefined')throw Error('DOMParser is unavailable in this browser.');const doc=new DOMParser().parseFromString(text,'application/xml');
+  if(doc.querySelector('parsererror'))throw Error('Invalid XML/XSD.');const types={};
+  for(const ct of [...doc.getElementsByTagName('*')].filter(x=>xmlLocalName(x)==='complexType'&&x.getAttribute('name')))types[ct.getAttribute('name')]=xsdComplexToSchema(ct,types);
+  for(const st of [...doc.getElementsByTagName('*')].filter(x=>xmlLocalName(x)==='simpleType'&&x.getAttribute('name')))types[st.getAttribute('name')]=xsdSimpleToSchema(st);
+  const roots=[...doc.getElementsByTagName('*')].filter(x=>xmlLocalName(x)==='element'&&x.parentElement&&xmlLocalName(x.parentElement)==='schema'&&x.getAttribute('name')),p={};
+  for(const el of roots)p[el.getAttribute('name')]=xsdElementToSchema(el,types);
+  const out={$schema:'http://json-schema.org/draft-06/schema#',title,type:'object',properties:p,additionalProperties:true};if(roots.length)out.required=roots.map(x=>x.getAttribute('name'));if(Object.keys(types).length)out.definitions=types;return out;
+}
+function wadlToJSONSchema(text,title='WADL Schema'){
+  if(typeof DOMParser==='undefined')throw Error('DOMParser is unavailable in this browser.');const doc=new DOMParser().parseFromString(text,'application/xml');
+  if(doc.querySelector('parsererror'))throw Error('Invalid XML/WADL.');const out={$schema:'http://json-schema.org/draft-06/schema#',title,type:'object',properties:{},additionalProperties:true,description:'Heuristic WADL-to-JSON-Schema conversion using representation metadata and embedded XSD when present.'};
+  let n=1;for(const r of [...doc.getElementsByTagName('*')].filter(x=>xmlLocalName(x)==='representation')){const element=(r.getAttribute('element')||'').replace(/^.*:/,''),media=r.getAttribute('mediaType')||'',key=element||`representation${n++}`;out.properties[key]={type:'object',description:`WADL representation${media?' '+media:''}${element?' element '+element:''}`}}
+  if(typeof XMLSerializer!=='undefined')for(const s of [...doc.getElementsByTagName('*')].filter(x=>xmlLocalName(x)==='schema')){try{const xs=xsdToJSONSchema(new XMLSerializer().serializeToString(s),title+' embedded XSD');Object.assign(out.properties,xs.properties||{});if(xs.definitions)out.definitions={...(out.definitions||{}),...xs.definitions}}catch{}}
+  return out;
+}
+function resolveFileRequired(ref){const f=resolveFileRef(ref);if(!f||Array.isArray(f))throw Error(`File not found: ${ref}`);return f}
+function jsonStable(v){if(Array.isArray(v))return v.map(jsonStable);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,jsonStable(v[k])]));return v}
+function deepMergeJSON(a,b){if(Array.isArray(a)&&Array.isArray(b))return[...a,...b];if(a&&b&&typeof a==='object'&&typeof b==='object'&&!Array.isArray(a)&&!Array.isArray(b)){const o={...a};for(const[k,v]of Object.entries(b))o[k]=k in o?deepMergeJSON(o[k],v):v;return o}return b}
+
+
+function walkJSON(v,path='$',out=[]){
+  if(Array.isArray(v)){out.push({path,value:v,type:'array'});v.forEach((x,i)=>walkJSON(x,`${path}[${i}]`,out))}
+  else if(v&&typeof v==='object'){out.push({path,value:v,type:'object'});for(const[k,x]of Object.entries(v))walkJSON(x,`${path}.${k}`,out)}
+  else out.push({path,value:v,type:schemaTypeOf(v)});return out;
+}
+function jsonDiffWalk(a,b,path='$',out=[]){
+  if(JSON.stringify(a)===JSON.stringify(b))return out;
+  if(a===undefined){out.push({kind:'ADDED',path,b});return out}
+  if(b===undefined){out.push({kind:'REMOVED',path,a});return out}
+  if(Array.isArray(a)&&Array.isArray(b)){const n=Math.max(a.length,b.length);for(let i=0;i<n;i++)jsonDiffWalk(a[i],b[i],`${path}[${i}]`,out);return out}
+  if(a&&b&&typeof a==='object'&&typeof b==='object'&&!Array.isArray(a)&&!Array.isArray(b)){for(const k of uniq([...Object.keys(a),...Object.keys(b)]))jsonDiffWalk(a[k],b[k],`${path}.${k}`,out);return out}
+  out.push({kind:'CHANGED',path,a,b});return out;
+}
+function exampleFromSchema(s){
+  if(s===true||!s||typeof s!=='object')return null;
+  if(s.example!==undefined)return s.example;if(s.default!==undefined)return s.default;if(s.enum&&s.enum.length)return s.enum[0];
+  const t=Array.isArray(s.type)?s.type.find(x=>x!=='null'):s.type;
+  if(t==='object'||s.properties){const o={};for(const[k,v]of Object.entries(s.properties||{}))o[k]=exampleFromSchema(v);return o}
+  if(t==='array')return[exampleFromSchema(s.items||{})];
+  if(t==='integer'||t==='number')return s.minimum!==undefined?s.minimum:0;
+  if(t==='boolean')return false;
+  if(t==='string'){if(s.format==='date')return'2026-01-01';if(s.format==='date-time')return'2026-01-01T00:00:00Z';if(s.format==='uri')return'https://example.com';return'string'}
+  return null;
+}
+function mockFromSchema(s,i=0){
+  if(s.enum&&s.enum.length)return s.enum[i%s.enum.length];
+  const t=Array.isArray(s.type)?s.type.find(x=>x!=='null'):s.type;
+  if(t==='object'||s.properties){const o={};for(const[k,v]of Object.entries(s.properties||{}))o[k]=mockFromSchema(v,i);return o}
+  if(t==='array')return[mockFromSchema(s.items||{},i)];
+  if(t==='integer')return(s.minimum||0)+i;if(t==='number')return(s.minimum||0)+i+.25;if(t==='boolean')return i%2===0;
+  if(t==='string'){if(s.format==='date')return`2026-01-${String((i%28)+1).padStart(2,'0')}`;if(s.format==='date-time')return`2026-01-${String((i%28)+1).padStart(2,'0')}T12:00:00Z`;return`sample${i+1}`}
+  return null;
+}
+function xmlNodeToObj(n){
+  const attrs={};for(const a of [...(n.attributes||[])])attrs['@'+a.name]=a.value;
+  const kids=[...(n.children||[])];if(!kids.length){const t=(n.textContent||'').trim();return Object.keys(attrs).length?{...attrs,'#text':t}:t}
+  const o={...attrs};for(const c of kids){const k=c.nodeName,v=xmlNodeToObj(c);if(k in o)o[k]=Array.isArray(o[k])?[...o[k],v]:[o[k],v];else o[k]=v}return o;
+}
+function objToXML(name,v){
+  if(Array.isArray(v))return v.map(x=>objToXML(name,x)).join('');
+  if(v&&typeof v==='object'){let attrs='',body='';for(const[k,x]of Object.entries(v)){if(k.startsWith('@'))attrs+=` ${k.slice(1)}="${String(x).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"`;else if(k==='#text')body+=String(x);else body+=objToXML(k,x)}return`<${name}${attrs}>${body}</${name}>`}
+  const t=String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');return`<${name}>${t}</${name}>`;
+}
+function csvObjects(text,d=','){let R=parseCSV(text,d),H=R[0]||[];return{headers:H,rows:R.slice(1).filter(r=>r.some(x=>x!=='')),objects:R.slice(1).filter(r=>r.some(x=>x!=='')).map(r=>Object.fromEntries(H.map((x,i)=>[x,r[i]??''])))}}
+function csvOut(headers,objects,d=','){return[headers.map(csvEsc).join(d),...objects.map(o=>headers.map(x=>csvEsc(o[x]??'')).join(d))].join('\n')}
+function cmpScalar(a,b){let na=Number(a),nb=Number(b);if(a!==''&&b!==''&&!isNaN(na)&&!isNaN(nb))return na-nb;return String(a).localeCompare(String(b))}
+function setLines(text){return new Set(lines(text).map(x=>x.trim()).filter(Boolean))}
+function parseCurl(s){
+  const toks=argsOf(s.replace(/\\\r?\n/g,' '));let method='GET',url='',headers={},data='';
+  for(let i=0;i<toks.length;i++){let t=toks[i];if(t==='curl')continue;if(t==='-X'||t==='--request')method=(toks[++i]||'GET').toUpperCase();else if(t==='-H'||t==='--header'){let x=toks[++i]||'',j=x.indexOf(':');if(j>=0)headers[x.slice(0,j).trim()]=x.slice(j+1).trim()}else if(['-d','--data','--data-raw','--data-binary'].includes(t))data=toks[++i]||'';else if(/^https?:\/\//i.test(t))url=t}
+  if(data&&method==='GET')method='POST';return{method,url,headers,data};
+}
+function fetchToCurlText(s){
+  const um=s.match(/fetch\(\s*['"]([^'"]+)['"]/),url=um?um[1]:'https://example.com',mm=s.match(/method\s*:\s*['"]([^'"]+)/i),method=mm?mm[1].toUpperCase():'GET';
+  let out=`curl -X ${method} "${url}"`;const hm=[...s.matchAll(/['"]([^'"]+)['"]\s*:\s*['"]([^'"]+)['"]/g)];for(const m of hm)if(/content-type|authorization|accept/i.test(m[1]))out+=` \\\n  -H "${m[1]}: ${m[2]}"`;return out;
+}
+function semverParts(s){const m=String(s).trim().replace(/^v/,'').match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);if(!m)return null;return[+m[1],+m[2],+m[3],m[4]||'']}
+function semverCmp(a,b){a=semverParts(a);b=semverParts(b);if(!a||!b)throw Error('Invalid semver');for(let i=0;i<3;i++)if(a[i]!==b[i])return a[i]-b[i];if(a[3]===b[3])return 0;if(!a[3])return 1;if(!b[3])return-1;return a[3].localeCompare(b[3],undefined,{numeric:true})}
+function ipToInt(s){const p=String(s).split('.').map(Number);if(p.length!==4||p.some(x=>x<0||x>255||!Number.isInteger(x)))throw Error('Invalid IPv4 address');return(((p[0]<<24)>>>0)+(p[1]<<16)+(p[2]<<8)+p[3])>>>0}
+function intToIp(n){n=Number(n)>>>0;return[(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.')}
+function cidrInfo(s){const[a,b]=String(s).split('/'),ip=ipToInt(a),bits=Number(b);if(bits<0||bits>32||!Number.isInteger(bits))throw Error('Invalid CIDR');const mask=bits===0?0:(0xffffffff<<(32-bits))>>>0,net=(ip&mask)>>>0,bcast=(net|(~mask>>>0))>>>0;return{ip:a,bits,mask:intToIp(mask),network:intToIp(net),broadcast:intToIp(bcast),first:intToIp(bits>=31?net:(net+1)>>>0),last:intToIp(bits>=31?bcast:(bcast-1)>>>0),addresses:2**(32-bits)}}
+function hexBytes(b){return[...b].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function fromHex(s){s=String(s).replace(/[^0-9a-f]/gi,'');if(s.length%2)throw Error('Odd hex length');return Uint8Array.from(s.match(/../g)||[],x=>parseInt(x,16))}
+function regexEscape(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+function wordCase(s,mode){let w=String(s).trim().split(/[^A-Za-z0-9]+|(?=[A-Z][a-z])/).filter(Boolean).map(x=>x.toLowerCase());if(mode==='camel')return w[0]+w.slice(1).map(x=>x[0].toUpperCase()+x.slice(1)).join('');if(mode==='pascal')return w.map(x=>x[0].toUpperCase()+x.slice(1)).join('');if(mode==='snake')return w.join('_');if(mode==='kebab')return w.join('-');if(mode==='constant')return w.join('_').toUpperCase();return w.join(' ')}
+function pemBlocks(t){return[...String(t).matchAll(/-----BEGIN ([^-]+)-----([\s\S]*?)-----END \1-----/g)].map(m=>({type:m[1].trim(),body:m[2].replace(/\s+/g,'')}))}
+
+const CATMAP={
+  Shell:['help','about','clear','history','echo','copy','save','recipe','cheatsheet'],
+  Generate:['uuid','guid','random','password','lorem','sequence','ulid','randombytes','csvfaker','jsonfaker'],
+  'Date & Number':['timestamp','epoch','dateadd','datediff','number','bytes','calc','cron'],
+  Encoding:['base64','url','html','hash','checksum','ascii','unicode','jwt','hex','rot13','hmac','pbkdf2','aes'],
+  Text:['case','lines','sort','unique','grep','head','tail','regex','replace','stats','indent','wrap','extract','nl','line','range','findtext','countmatch','context','blank','nonblank','longest','shortest','contains','trim','reverse','shuffle','sample','frequency','duplicates','sortnum','prefix','suffix','between','slice','words','chars','slug','repeat','normalizews','pad','truncate','split','join','intersect','subtract','union','symmetricdiff'],
+  Data:['json','jsonpath','flatten','jsonsort','jsonpick','jsonomit','jsonmerge','jsonkeys','jsonpaths','jsonvalues','jsonsearch','jsonstats','jsondiff','diffjson','xml','xml2json','json2xml','xpath','xmlstats','xmlvalidate','csv','csv2json','json2csv','csvheaders','csvselect','csvdrop','csvwhere','csvsort','csvdistinct','csvgroup','csvstats','csvjoin','csvcol','detect','mime','querystring','fetchjson','fetchtext','jsonpathvalues'],
+  Schema:['jsonschema','jsonschemapaths','jsonschemaexample','wadl2schema','xsd2jsonschema'],
+  HTTP:['curl','curl2fetch','fetch2curl','headers','basicauth','bearer','httpstatus','fetchweb','renderweb'],
+  Network:['cidr','ip2int','int2ip','iprange','mac'],
+  Security:['peminspect','certinspect'],
+  Developer:['semver','escape','unescape','identifier','template','uuidvalidate','uuidversion'],
+  Paths:['basename','dirname','extname'],
+  SQL:['sql','sqlin'],
+  Files:['files','use','cat','remove','clearfiles','rename','clone','workspaceinfo','inspect','snapshot','fileinfo','hexdump','compare','diff','difflines','diffxml','manifest','findfiles','concatfiles','workspacehash','duplicatefiles','logstats'],
+  SSH:['sshkey','sshpublic','sshprivate','sshfingerprint','sshinspect','sshconfig','authorizedkey','knownhost','sshsave']
+};
+function categoryOf(name){
+  name=(C[name]?.canon||name);
+  for(const [cat,list] of Object.entries(CATMAP))if(list.includes(name))return cat;
+  return 'Other';
+}
+
+const C={};function reg(n,s,u,f,a=[]){C[n]={n,s,u,f,a};for(let x of a)C[x]={n:x,s,u,f,a,canon:n}}function canon(){let seen=new Set(),a=[];for(let c of Object.values(C)){let k=c.canon||c.n;if(!seen.has(k)){seen.add(k);a.push(C[k])}}return a.sort((x,y)=>x.n.localeCompare(y.n))}
+const HELP_DETAILS={
+  fetchweb:`STEP-BY-STEP WEBPAGE FETCH
+
+1. Open TGTT in your browser.
+2. If the remote site blocks cross-origin requests, enable a CORS-unblocking browser extension for that site. Only use such an extension when needed and only for sites you trust.
+3. Run:
+   fetchweb https://example.test/path/to/page
+4. TGTT fetches the page using applicable browser session credentials and stores the returned HTML in the Scratch Pad and workspace.
+5. Check the result:
+   - Final URL should be the page you expected.
+   - Redirected: NO is usually desirable for an authenticated page.
+   - If Final URL is a login page, the remote site did not accept the browser session.
+6. Note the workspace number TGTT assigns, for example #1.
+7. For a JavaScript-rendered site, continue with:
+   renderweb #1 10 "My Webpage Snapshot"
+
+CORS EXTENSION NOTE
+A remote site may reject browser fetches because of CORS. A CORS-unblocking extension can sometimes make testing possible. Credentialed requests cannot use Access-Control-Allow-Origin: *. When TGTT is opened from file://, the browser may report its request origin as null, so the extension may need a matching custom origin. Browser/site security policies vary. Do not weaken security controls globally; scope testing to the target site and turn overrides off when finished.
+
+EXAMPLE
+fetchweb https://example.test/apps/sample?page=grid`,
+
+  renderweb:`STEP-BY-STEP RENDER + CAPTURE
+
+renderweb is intended for webpages already loaded into the TGTT workspace by fetchweb.
+
+1. First fetch a webpage, for example:
+   fetchweb https://example.test/apps/sample?page=grid
+2. TGTT reports a workspace item such as #1.
+3. Run:
+   renderweb #1 10 "My Webpage Snapshot"
+   #1 = the fetched webpage workspace item.
+   10 = seconds before TGTT marks the render wait complete.
+   "My Webpage Snapshot" = optional label for the exported PNG.
+   If omitted, TGTT uses the fetched workspace filename.
+4. TGTT opens the original remote URL directly in a normal browser tab so the site's JavaScript can render normally.
+5. Wait until the remote page visibly finishes loading. The timer is only a guide; you can wait longer if necessary.
+6. Return to the TGTT tab.
+7. In the TGTT Render Capture panel, click Capture Rendered Tab.
+8. Your browser opens its screen/tab-sharing picker.
+9. Select the browser tab containing the fully rendered remote webpage.
+10. TGTT captures the selected tab and saves a timestamped PNG.
+
+WHY DIRECT-TAB CAPTURE?
+Some applications refuse to run inside an iframe because of X-Frame-Options, CSP frame-ancestors, authentication, or other browser security rules. renderweb therefore opens the real page directly and uses the browser's explicit tab-capture permission.
+
+CORS EXTENSION NOTE
+fetchweb may require a CORS-unblocking browser extension for some sites. renderweb itself uses normal page navigation, but the site's application requests must still be allowed by the browser. Only use CORS/security overrides for sites you trust, scope them narrowly, and disable them when testing is complete.
+
+EXAMPLE
+fetchweb https://example.test/apps/sample?page=grid
+renderweb #1 10 "Sample Application Grid"`
+};
+reg('help','List commands or show command help.','help [command]',async({a})=>{if(a[0]){let key=String(a[0]).toLowerCase(),c=C[key];if(!c)throw Error('Unknown command');let detail=HELP_DETAILS[key];return`${c.n} — ${c.s}\nUsage: ${c.u}${detail?`\n\n${detail}`:''}`};return canon().map(c=>c.n.padEnd(12)+c.s).join('\n')+'\n\nUse: help <command>'});
+
+/* Cheat-sheet documentation is derived from the live command registry.
+   The registry summary/usage remain authoritative; these helpers expand
+   them into practical explanations/examples without maintaining a second
+   command list. */
+function tgttCheatDetail(c){
+  const usage=(c.u||c.n).trim();
+  const summary=(c.s||'TGTT utility command.').trim();
+  const lower=usage.toLowerCase();
+  let detail=summary;
+  if(/\[#id\|filename\]/i.test(usage)){
+    detail+=` Use the active Scratch Pad by default, or pass a workspace reference such as #1 or a loaded filename when shown in the usage.`;
+  }else if(/\[#id|#id\|filename|filename/i.test(usage)){
+    detail+=` This command can work with content in TGTT's in-memory workspace when a file/reference argument is supplied.`;
+  }else if(/\[text\]|<text>|plain text|text/i.test(summary+' '+usage)){
+    detail+=` Supply the value shown in the usage syntax; where supported, TGTT also uses the Scratch Pad as the working input.`;
+  }
+  if(/^fetch|web|url|http|curl|ssh/i.test(c.n+' '+summary)){
+    detail+=` This operation may involve browser/network security rules such as CORS, credentials, pop-up permission, or an explicit user-approved browser action.`;
+  }
+  return detail;
+}
+function tgttCheatExample(c){
+  const u=(c.u||c.n).trim();
+  const n=c.n;
+  const explicit={
+    help:'help json',
+    cheatsheet:'cheatsheet JSON',
+    wrap:'wrap 50 The quick brown fox jumps over the lazy dog and keeps going until TGTT wraps the line.',
+    recipe:'recipe web-capture',
+    fetchweb:'fetchweb https://httpbin.org/html',
+    renderweb:'renderweb #1 5 "TGTT Public Fetch Test"',
+    fetchjson:'fetchjson https://httpbin.org/json',
+    fetchtext:'fetchtext https://httpbin.org/robots.txt',
+    inspect:'inspect #1',
+    clone:'clone #1 copy.txt',
+    workspaceinfo:'workspaceinfo',
+    logstats:'logstats #1',
+    sqlin:"sqlin 1001,1002,1003",
+    json:'json pretty #1',
+    jsonpaths:'jsonpaths #1',
+    jsonpathvalues:'jsonpathvalues #1',
+    jsonschemapaths:'jsonschemapaths #1',
+    csvstats:'csvstats #1',
+    csvgroup:'csvgroup STATUS #1',
+    csvsort:'csvsort ORDER_DATE desc #1',
+    compare:'compare #1 #2',
+    rename:'rename #1 orders-clean.csv',
+    timestamp:'timestamp',
+    grep:'grep -i error #1',
+    head:'head 20 #1',
+    tail:'tail 20 #1',
+    regex:'regex "\\\\b[A-Z]{3}-\\\\d{4}\\\\b"',
+    replace:'replace "old value" "new value" #1',
+    identifier:'identifier snake "Customer Order Number"',
+    httpstatus:'httpstatus 404',
+    bearer:'bearer eyJhbGciOi...',
+    repeat:'repeat 3 " | " #1',
+    concatfiles:'concatfiles #1 #2 #3',
+    snapshot:'snapshot #1 project-status',
+    fileinfo:'fileinfo #1',
+    hexdump:'hexdump #1',
+    uuid:'uuid',
+    random:'random 1 100',
+    password:'password 20',
+    calc:'calc (1250*1.06)+75',
+    bytes:'bytes 1048576',
+    number:'number 1234567.89',
+    date:'date',
+    base64:'base64 encode "Hello TGTT"',
+    url:'url encode "customer name=Greco & Sons"',
+    html:'html encode "<div>Example</div>"',
+    hash:'hash sha256 "Hello TGTT"',
+    checksum:'checksum #1',
+    detect:'detect #1',
+    mime:'mime report.json',
+    ascii:'ascii "TGTT"',
+    lorem:'lorem 2',
+    sequence:'sequence 1 10',
+    copy:'copy',
+    save:'save output.txt',
+    files:'files',
+    use:'use #1',
+    scratch:'scratch',
+    clear:'clear',
+    history:'history',
+    echo:'echo Hello TGTT'
+  };
+  if(explicit[n])return explicit[n];
+
+  /* Convert the authoritative usage syntax into a readable sample without
+     pretending every optional argument is required. */
+  let ex=u
+    .replace(/\[#id\|filename\]/gi,'#1')
+    .replace(/<#id\|filename>/gi,'#1')
+    .replace(/\[#id\]/gi,'#1')
+    .replace(/<#id>/gi,'#1')
+    .replace(/<url>/gi,'https://example.com/data')
+    .replace(/<filename>/gi,'sample.txt')
+    .replace(/<column>/gi,'STATUS')
+    .replace(/<code>/gi,'200')
+    .replace(/<count>/gi,'3')
+    .replace(/<width>/gi,'80')
+    .replace(/<pattern>/gi,'"error|warning"')
+    .replace(/<regex>/gi,'"error|warning"')
+    .replace(/<token>/gi,'TOKEN_VALUE')
+    .replace(/<text>/gi,'"sample text"')
+    .replace(/\[[^\]]+\]/g,'')
+    .replace(/<([^>]+)>/g,(_,x)=>String(x).split('|')[0].replace(/[^A-Za-z0-9_.-]/g,'')||'value')
+    .replace(/\s+/g,' ')
+    .trim();
+  return ex||n;
+}
+reg('cheatsheet','Open a printable/exportable command cheat sheet generated from the live TGTT registry.','cheatsheet [category]',async({rest})=>{
+  const requested=unq(rest).trim();
+  const all=canon();
+  const categories=[...new Set(all.map(c=>categoryOf(c.n)))].sort((a,b)=>a.localeCompare(b));
+  let selected=categories;
+  if(requested){
+    const match=categories.find(c=>c.toLowerCase()===requested.toLowerCase());
+    if(!match)throw Error(`Unknown category "${requested}". Available: ${categories.join(', ')}`);
+    selected=[match];
+  }
+  const eh=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const groups=selected.map(cat=>({cat,commands:all.filter(c=>categoryOf(c.n)===cat).sort((a,b)=>a.n.localeCompare(b.n))})).filter(g=>g.commands.length);
+  const generated=snapshotTimestamp();
+  const count=groups.reduce((n,g)=>n+g.commands.length,0);
+  const sheetTitle=requested?`TGTT ${groups[0].cat} Command Cheat Sheet`:'TGTT Command Cheat Sheet';
+  const sections=groups.map(g=>`
+<section>
+<h2>${eh(g.cat)} <span>${g.commands.length}</span></h2>
+<table><thead><tr><th>Command</th><th>Description / Usage</th></tr></thead><tbody>
+${g.commands.map(c=>`<tr><td class="command">${eh(c.n)}</td><td>
+<div class="summary">${eh(tgttCheatDetail(c))}</div>
+<div class="label">Usage</div><code>${eh(c.u||c.n)}</code>
+<div class="label example-label">Practical example</div><code class="example">${eh(tgttCheatExample(c))}</code>
+</td></tr>`).join('')}
+</tbody></table>
+</section>`).join('');
+  const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${eh(sheetTitle)}</title><style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#172033;background:#eef2f6}*{box-sizing:border-box}body{margin:0;background:#eef2f6;color:#172033}
+.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:10px;align-items:center;padding:10px 16px;background:#0f172a;color:#fff;box-shadow:0 2px 8px #0003}.toolbar strong{margin-right:auto}
+button{border:1px solid #64748b;background:#fff;color:#0f172a;border-radius:6px;padding:7px 12px;font-weight:700;cursor:pointer}
+main{max-width:1100px;margin:20px auto;padding:0 18px 30px}header{background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:18px 20px;margin-bottom:18px}
+h1{font-size:24px;margin:0 0 6px}.meta{font-size:12px;color:#64748b;line-height:1.55}section{background:#fff;border:1px solid #cbd5e1;border-radius:10px;margin:0 0 18px;overflow:hidden}
+h2{font-size:17px;margin:0;padding:10px 14px;background:#e2e8f0;border-bottom:1px solid #cbd5e1}h2 span{float:right;font-size:12px;font-weight:400;color:#64748b}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid #e2e8f0}th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#475569;background:#f8fafc}
+tr:last-child td{border-bottom:0}.command{width:22%;font:700 13px Consolas,"Courier New",monospace;color:#0f172a}.summary{font-size:12px;line-height:1.45;margin-bottom:7px}.label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin:3px 0 2px}.example-label{margin-top:7px}code{display:block;font:11px Consolas,"Courier New",monospace;color:#475569;white-space:pre-wrap;overflow-wrap:anywhere}.example{color:#0f5132;background:#f0fdf4;border-left:3px solid #86efac;padding:4px 6px}
+footer{text-align:center;color:#64748b;font-size:11px;padding:8px}
+@media print{@page{size:auto;margin:.45in}body{background:#fff}.toolbar{display:none!important}main{max-width:none;margin:0;padding:0}header,section{border:0;border-radius:0;margin:0 0 12px;box-shadow:none}header{padding:0 0 10px}h1{font-size:18px}h2{font-size:13px;padding:6px 8px;background:#eaeef3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}th,td{padding:5px 7px}.command{font-size:10px}.summary{font-size:8.5px}.label{font-size:7px}.example-label{margin-top:4px}code{font-size:7.5px}.example{padding:2px 4px}thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}footer{font-size:8px}}
+</style></head><body>
+<div class="toolbar"><strong>${eh(sheetTitle)}</strong><button onclick="window.print()">Print / Save as PDF</button><button onclick="window.close()">Close</button></div>
+<main><header><h1>TGTT — The Greco Tiny Terminal</h1><div><strong>${eh(requested?groups[0].cat+' Command Cheat Sheet':'Command Cheat Sheet')}</strong></div>
+<div class="meta">v0046 · ${count} command${count===1?'':'s'} · Generated ${eh(generated.display)} (24-hour)<br>${eh(generated.localIso)}<br>Each entry includes its purpose, authoritative usage syntax, and a practical starting example.</div></header>
+${sections}<footer>Generated directly from the live TGTT v0046 command registry · mikejamesgreco.me LLC</footer></main></body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(!win){URL.revokeObjectURL(url);throw Error('Popup blocked. Allow popups for TGTT and retry cheatsheet.');}
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  return `Opened printable cheat sheet in a new tab: ${count} command${count===1?'':'s'}${requested?` in ${groups[0].cat}`:''}.\nUse "Print / Save as PDF" in the cheat sheet to print it or export a PDF.`;
+});
+
+reg('about','Show TGTT information.','about',async()=>`TGTT Tiny Terminal v0046\nThe Greco Tiny Terminal\nSingle-file local-first developer toolbox.\nSearchable categorized catalog, multi-file local workspace, pipelines, and text/data utilities.`);
+reg('clear','Clear terminal output.','clear',async()=>{ui.out.innerHTML='';return''});reg('history','Show command history.','history',async()=>hist.map((x,i)=>`${i+1}. ${x}`).join('\n')||'(empty)');reg('echo','Echo text or scratch input.','echo [text]',async({rest,input})=>rest.trim()||input);reg('stats','Count chars, words, lines, bytes.','stats [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),t=src.text;return`source: ${src.label}\ncharacters: ${t.length}\nwords: ${(t.trim().match(/\S+/g)||[]).length}\nlines: ${lines(t).length}\nUTF-8 bytes: ${TE.encode(t).length}`});
+reg('uuid','Generate UUIDs.','uuid [count]',async({a})=>Array.from({length:Math.min(100,Math.max(1,+a[0]||1))},()=>crypto.randomUUID()).join('\n'),['guid']);
+reg('random','Generate random hex bytes.','random [bytes]',async({a})=>{let n=Math.min(4096,Math.max(1,+a[0]||16)),b=new Uint8Array(n);crypto.getRandomValues(b);return hex(b)});reg('password','Generate strong passwords.','password [length] [count]',async({a})=>{let L=Math.min(256,Math.max(8,+a[0]||24)),N=Math.min(50,Math.max(1,+a[1]||1)),chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*_-+=';return Array.from({length:N},()=>{let b=new Uint8Array(L);crypto.getRandomValues(b);return[...b].map(x=>chars[x%chars.length]).join('')}).join('\n')});
+reg('timestamp','Show local/ISO/epoch time.','timestamp',async()=>{let d=new Date();return`local: ${d.toLocaleString()}\niso: ${d.toISOString()}\nepoch seconds: ${Math.floor(d/1000)}\nepoch ms: ${+d}`});reg('epoch','Convert epoch/date text.','epoch [value]',async({rest,input})=>dateFmt(dateOf(unq(rest)||input.trim())));reg('dateadd','Add time to a date.','dateadd <amount> <unit> [date]',async({a})=>{let n=+a[0],u=(a[1]||'').toLowerCase(),d=dateOf(a.slice(2).join(' ')),m={second:1e3,seconds:1e3,minute:6e4,minutes:6e4,hour:36e5,hours:36e5,day:864e5,days:864e5,week:6048e5,weeks:6048e5}[u];if(m)d=new Date(+d+n*m);else if(/^month/.test(u))d.setMonth(d.getMonth()+n);else if(/^year/.test(u))d.setFullYear(d.getFullYear()+n);else throw Error('Units: seconds minutes hours days weeks months years');return dateFmt(d)});reg('datediff','Difference between two dates.','datediff <date1> ; <date2>',async({rest})=>{let p=rest.split(';');if(p.length!==2)throw Error('Separate dates with ;');let ms=dateOf(p[1])-dateOf(p[0]);return`milliseconds: ${ms}\nseconds: ${ms/1000}\nminutes: ${ms/60000}\nhours: ${ms/3600000}\ndays: ${ms/86400000}`});
+reg('base64','Base64 encode/decode.','base64 encode|decode [text]',async({a,rest,input})=>{let m=a[0],d=inputOf(rest.replace(/^\s*\S+\s*/,''));if(m==='encode')return b64e(d);if(m==='decode')return b64d(d);throw Error('Use encode|decode')});reg('url','URL encode/decode.','url encode|decode [text]',async({a,rest,input})=>{let m=a[0],d=inputOf(rest.replace(/^\s*\S+\s*/,''));return m==='encode'?encodeURIComponent(d):m==='decode'?decodeURIComponent(d):(()=>{throw Error('Use encode|decode')})()});reg('html','HTML entity encode/decode.','html encode|decode',async({a,input})=>a[0]==='encode'?input.replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c])):a[0]==='decode'?(()=>{let t=document.createElement('textarea');t.innerHTML=input;return t.value})():(()=>{throw Error('Use encode|decode')})());
+reg('hash','Hash text with SHA algorithms.','hash sha256 [text]',async({a,rest,input})=>{let M={sha1:'SHA-1',sha256:'SHA-256',sha384:'SHA-384',sha512:'SHA-512'},A=M[(a[0]||'sha256').toLowerCase()];if(!A)throw Error('sha1 sha256 sha384 sha512');return hash(A,inputOf(rest.replace(/^\s*\S+\s*/,'')))});reg('checksum','Hash workspace file/text.','checksum [sha256] [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),alg=(src.args[0]||'sha256').toLowerCase(),M={sha1:'SHA-1',sha256:'SHA-256',sha384:'SHA-384',sha512:'SHA-512'},A=M[alg];if(!A)throw Error('sha1 sha256 sha384 sha512');return`${src.label}\n${A}: ${await hash(A,TE.encode(src.text))}`});
+reg('number','Convert bases.','number [hex|dec|bin|oct] <value>',async({a})=>{let mode=a[0],v=a[1]??a[0],n=/^0x/i.test(v)?parseInt(v,16):/^0b/i.test(v)?parseInt(v.slice(2),2):/^0o/i.test(v)?parseInt(v.slice(2),8):Number(v);if(!Number.isFinite(n))throw Error('Invalid number');if(!a[1])return`dec: ${n}\nhex: 0x${Math.trunc(n).toString(16).toUpperCase()}\nbin: 0b${Math.trunc(n).toString(2)}\noct: 0o${Math.trunc(n).toString(8)}`;return mode==='hex'?'0x'+Math.trunc(n).toString(16).toUpperCase():mode==='bin'?'0b'+Math.trunc(n).toString(2):mode==='oct'?'0o'+Math.trunc(n).toString(8):String(n)});reg('bytes','Human-readable byte units.','bytes <number>',async({a,input})=>human(a[0]||input.trim()));reg('calc','Safe numeric calculator.','calc <expression>',async({rest,input})=>String(calc(unq(rest)||input.trim())));
+reg('case','Change case.','case upper|lower|title|camel|pascal|snake|kebab|constant',async({a,rest,input})=>{let m=a[0],s=inputOf(rest.replace(/^\s*\S+\s*/,'')),w=s.replace(/([a-z0-9])([A-Z])/g,'$1 $2').split(/[^A-Za-z0-9]+/).filter(Boolean).map(x=>x.toLowerCase());if(m==='upper')return s.toUpperCase();if(m==='lower')return s.toLowerCase();if(m==='title')return w.map(x=>x[0].toUpperCase()+x.slice(1)).join(' ');if(m==='camel')return w.map((x,i)=>i?x[0].toUpperCase()+x.slice(1):x).join('');if(m==='pascal')return w.map(x=>x[0].toUpperCase()+x.slice(1)).join('');if(m==='snake')return w.join('_');if(m==='kebab')return w.join('-');if(m==='constant')return w.join('_').toUpperCase();throw Error('Unknown mode')});
+reg('lines','Line utilities.','lines count|unique|sort|reverse|trim|prefix|suffix|join [arg]',async({a,input})=>{let m=a[0]||'count',arg=a.slice(1).join(' '),L=lines(input);if(m==='count')return String(L.length);if(m==='unique')return[...new Set(L)].join('\n');if(m==='sort')return L.sort().join('\n');if(m==='reverse')return L.reverse().join('\n');if(m==='trim')return L.map(x=>x.trim()).join('\n');if(m==='prefix')return L.map(x=>arg+x).join('\n');if(m==='suffix')return L.map(x=>x+arg).join('\n');if(m==='join')return L.join(arg||',');throw Error('Unknown mode')});reg('sort','Sort lines.','sort [numeric] [desc]',async({a,input})=>{let L=lines(input);a.includes('numeric')?L.sort((x,y)=>+x-+y):L.sort((x,y)=>x.localeCompare(y));if(a.includes('desc'))L.reverse();return L.join('\n')});reg('unique','Deduplicate lines.','unique [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input);return[...new Set(lines(src.text))].join('\n')});reg('grep','Find matching lines with line numbers.','grep [-i] [-v] <regex> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),args=src.args,flags='',invert=false;
+  while(args[0]&&/^-[iv]+$/.test(args[0])){
+    const f=args.shift();if(f.includes('i'))flags+='i';if(f.includes('v'))invert=true;
+  }
+  if(!args.length)throw Error('Use: grep [-i] [-v] <regex> [#id|filename]');
+  const rx=rFrom(args.join(' '),flags),out=[];
+  lines(src.text).forEach((ln,i)=>{rx.lastIndex=0;const hit=rx.test(ln);if(invert?!hit:hit)out.push(`${matchLineLabel(src,i+1)}: ${ln}`)});
+  return out.join('\n')||'(no matches)';
+});reg('head','First N lines.','head [n] [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input);return lines(src.text).slice(0,+src.args[0]||10).join('\n')});reg('tail','Last N lines.','tail [n] [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input);return lines(src.text).slice(-(+src.args[0]||10)).join('\n')});reg('regex','Test a regular expression.','regex <pattern>',async({rest,input})=>{const p=unq(rest).trim();if(!p)throw Error('Provide a regular expression pattern.');let r=rFrom(p,'g'),m=[...input.matchAll(r)];return m.length?m.map((x,i)=>`[${i}] ${x[0]}\n    index: ${x.index}${x.length>1?'\n    groups: '+JSON.stringify(x.slice(1)):''}`).join('\n'):'NO MATCH'});reg('replace','Regex replacement.','replace <pattern> ; <replacement>',async({rest,input})=>{let p=rest.split(';');if(p.length<2)throw Error('Use ; between pattern and replacement');return input.replace(rFrom(unq(p[0].trim()),'g'),p.slice(1).join(';').trim())});
+reg('json','Pretty/minify/validate JSON.','json pretty|minify|validate [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),o=JSON.parse(src.text),m=src.args[0]||'pretty';return m==='validate'?'VALID JSON':m==='minify'?JSON.stringify(o):JSON.stringify(o,null,2)});reg('jsonpath','Simple JSON path lookup.','jsonpath $.a.b[0]',async({rest,input})=>{let v=pathGet(JSON.parse(input),unq(rest));return typeof v==='string'?v:JSON.stringify(v,null,2)});reg('flatten','Flatten nested JSON.','flatten',async({input})=>JSON.stringify(flatten(JSON.parse(input)),null,2));reg('xml','Pretty print XML/markup.','xml pretty',async({input})=>xmlPretty(input));reg('csv','Inspect CSV dimensions/sample.','csv inspect [delimiter]',async({a,input})=>{let d=a[1]||',',R=parseCSV(input,d);return`rows: ${R.length}\nmax columns: ${Math.max(...R.map(r=>r.length))}\ndelimiter: ${JSON.stringify(d)}\n\nsample:\n${R.slice(0,8).map((r,i)=>i+': '+JSON.stringify(r)).join('\n')}`});reg('csv2json','CSV to JSON objects.','csv2json [delimiter]',async({a,input})=>{let R=parseCSV(input,a[0]||','),H=R[0]||[];return JSON.stringify(R.slice(1).filter(r=>r.some(v=>v!=='')).map(r=>Object.fromEntries(H.map((h,i)=>[h,r[i]??'']))),null,2)});reg('json2csv','JSON array to CSV.','json2csv',async({input})=>{let A=JSON.parse(input);if(!Array.isArray(A)||!A.length)throw Error('Expected non-empty array');let H=[...new Set(A.flatMap(o=>Object.keys(o)))];return[H.map(csvEsc).join(','),...A.map(o=>H.map(h=>csvEsc(o[h])).join(','))].join('\n')});
+
+
+reg('jsonschemapaths','List JSON data paths described by a JSON Schema.','jsonschemapaths [types|required] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),mode=(src.args[0]||'').toLowerCase(),schema=JSON.parse(src.text),p=schemaPaths(schema);
+  if(!p.length)return'(no schema paths found)';
+  if(mode==='types')return p.map(x=>`${x.path}\t${x.type}${x.required?'\trequired':''}`).join('\n');
+  if(mode==='required')return p.filter(x=>x.required).map(x=>x.path).join('\n')||'(no required property paths)';
+  return p.map(x=>x.path).join('\n');
+});
+
+reg('jsonschema','Infer, inspect, or validate JSON Schema draft-06.','jsonschema infer [#id|filename] | inspect [#id|filename] | validate <schemaRef> <jsonRef>',async({a,input})=>{
+  const mode=(a.shift()||'infer').toLowerCase();
+  if(mode==='infer'){let src=resolveTextSource(a,input),obj=JSON.parse(src.text),title=src.file?src.file.name:'Generated Schema';return JSON.stringify(draft6Schema(obj,title),null,2)}
+  if(mode==='inspect'){let src=resolveTextSource(a,input),s=JSON.parse(src.text);return`draft: ${s.$schema||'(not declared)'}\ntitle: ${s.title||'(none)'}\n\n${schemaSummary(s).join('\n')}`}
+  if(mode==='validate'){if(a.length<2)throw Error('Use: jsonschema validate <schemaRef> <jsonRef>');const sf=resolveFileRequired(a[0]),jf=resolveFileRequired(a[1]),s=JSON.parse(sf.text),v=JSON.parse(jf.text),e=validateDraft6Basic(s,v);return e.length?`INVALID (${e.length} issue${e.length===1?'':'s'})\n`+e.map((x,i)=>`${i+1}. ${x}`).join('\n'):'VALID against supported draft-06 constraints'}
+  throw Error('Modes: infer inspect validate');
+});
+reg('wadl2schema','Convert WADL metadata/embedded XSD to draft-06 JSON Schema.','wadl2schema [#id|filename|*]',async({a,input})=>{
+  if(a[0]==='*'){const files=workspaceFiles.filter(f=>/\.wadl$|\.xml$/i.test(f.name));if(!files.length)throw Error('No WADL/XML files loaded.');const b={$schema:'http://json-schema.org/draft-06/schema#',title:'TGTT WADL Schema Bundle',definitions:{}};for(const f of files)b.definitions[f.name.replace(/\W+/g,'_')]=wadlToJSONSchema(f.text,f.name);return JSON.stringify(b,null,2)}
+  let src=resolveTextSource(a,input);return JSON.stringify(wadlToJSONSchema(src.text,src.file?src.file.name:'WADL Schema'),null,2);
+});
+reg('xsd2jsonschema','Convert XSD to draft-06 JSON Schema.','xsd2jsonschema [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input);return JSON.stringify(xsdToJSONSchema(src.text,src.file?src.file.name:'XSD Schema'),null,2)});
+reg('jsonsort','Recursively sort JSON object keys.','jsonsort [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input);return JSON.stringify(jsonStable(JSON.parse(src.text)),null,2)});
+reg('jsonpick','Keep selected top-level JSON properties.','jsonpick key1 key2 ... [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),o=JSON.parse(src.text),keys=src.args;if(!keys.length)throw Error('Provide one or more property names.');return JSON.stringify(Object.fromEntries(keys.filter(k=>Object.prototype.hasOwnProperty.call(o,k)).map(k=>[k,o[k]])),null,2)});
+reg('jsonomit','Remove selected top-level JSON properties.','jsonomit key1 key2 ... [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),o=JSON.parse(src.text),drop=new Set(src.args);return JSON.stringify(Object.fromEntries(Object.entries(o).filter(([k])=>!drop.has(k))),null,2)});
+reg('jsonmerge','Deep-merge two JSON workspace files.','jsonmerge #1 #2',async({a})=>{let{left,right}=resolveTwoFiles(a);return JSON.stringify(deepMergeJSON(JSON.parse(left.text),JSON.parse(right.text)),null,2)});
+reg('basename','Return the final path component.','basename <path>',async({rest})=>{let s=unq(rest).replace(/[\\\\/]+$/,'');return s.split(/[\\\\/]/).pop()||''});
+reg('dirname','Return the directory portion of a path.','dirname <path>',async({rest})=>{let s=unq(rest).replace(/[\\\\/]+$/,'');let i=Math.max(s.lastIndexOf('/'),s.lastIndexOf('\\\\'));return i<0?'.':s.slice(0,i)||s[0]});
+reg('extname','Return a filename extension.','extname <path>',async({rest})=>{let b=unq(rest).split(/[\\\\/]/).pop()||'',i=b.lastIndexOf('.');return i>0?b.slice(i):''});
+reg('normalizews','Normalize whitespace.','normalizews [single|lines] [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),m=(src.args[0]||'single').toLowerCase();if(m==='single')return src.text.replace(/\s+/g,' ').trim();if(m==='lines')return lines(src.text).map(x=>x.replace(/[ \t]+/g,' ').trim()).join('\n');throw Error('Modes: single lines')});
+reg('pad','Pad every line to a width.','pad <width> [left|right] [char] [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),w=Number(src.args[0]),side=(src.args[1]||'right').toLowerCase(),ch=(src.args[2]||' ')[0];if(!Number.isInteger(w)||w<0)throw Error('Width must be a non-negative integer.');return lines(src.text).map(x=>side==='left'?x.padStart(w,ch):x.padEnd(w,ch)).join('\n')});
+reg('truncate','Truncate each line to a maximum width.','truncate <width> [ellipsis] [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),w=Number(src.args[0]),el=src.args[1]===undefined?'…':src.args[1];if(!Number.isInteger(w)||w<0)throw Error('Width must be a non-negative integer.');return lines(src.text).map(x=>x.length<=w?x:(w<=el.length?el.slice(0,w):x.slice(0,w-el.length)+el)).join('\n')});
+reg('split','Split text by a literal delimiter into lines.','split <delimiter> [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),d=src.args.join(' ');if(!d)throw Error('Provide a delimiter.');return src.text.split(d).join('\n')});
+reg('join','Join input lines with a delimiter.','join <delimiter> [#id|filename]',async({a,input})=>{let src=resolveTextSource(a,input),d=src.args.join(' ');return lines(src.text).join(d)});
+
+
+reg('jsonpaths','List every JSON path.','jsonpaths [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),o=JSON.parse(s.text);return walkJSON(o).map(x=>x.path).join('\n')});
+
+reg('jsonpathvalues','Flatten JSON into one JSONPath-style path and resolved value per line. Leaf values are shown by default; use all to include objects and arrays.','jsonpathvalues [#id|filename] [all]',async({a,input})=>{
+  const src=resolveTextSource(a,input);
+  const args=[...src.args];
+  const allIndex=args.findIndex(x=>String(x).toLowerCase()==='all');
+  const includeAll=allIndex>=0;
+  if(allIndex>=0)args.splice(allIndex,1);
+
+  const text=src.text;
+  if(!text||!text.trim())throw Error('Provide JSON in the Scratch Pad or pass a workspace reference such as #1.');
+  let root;
+  try{root=JSON.parse(text)}catch(e){throw Error(`Invalid JSON: ${e.message}`)}
+
+  const pathKey=k=>/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(k)?'.'+k:'['+JSON.stringify(k)+']';
+  const fmt=v=>{
+    if(v===null)return'null';
+    if(typeof v==='string')return JSON.stringify(v);
+    if(typeof v==='number'||typeof v==='boolean')return String(v);
+    return JSON.stringify(v);
+  };
+  const out=[];
+  const walk=(v,path)=>{
+    const isObj=v!==null&&typeof v==='object';
+    if(!isObj){
+      out.push(`${path} = ${fmt(v)}`);
+      return;
+    }
+    if(includeAll)out.push(`${path} = ${fmt(v)}`);
+    if(Array.isArray(v)){
+      v.forEach((item,i)=>walk(item,`${path}[${i}]`));
+    }else{
+      Object.keys(v).forEach(k=>walk(v[k],path+pathKey(k)));
+    }
+  };
+  walk(root,'$');
+  return out.length?out.join('\n'):'(no JSON values)';
+});
+
+reg('jsonvalues','List JSON path, type, and scalar value.','jsonvalues [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),o=JSON.parse(s.text);return walkJSON(o).filter(x=>!['object','array'].includes(x.type)).map(x=>`${x.path}\t${x.type}\t${JSON.stringify(x.value)}`).join('\n')});
+reg('jsonsearch','Search JSON keys and values recursively.','jsonsearch [-i] <text> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),args=s.args,ci=args[0]==='-i';if(ci)args.shift();let q=args.join(' ');if(!q)throw Error('Provide search text.');if(ci)q=q.toLowerCase();return walkJSON(JSON.parse(s.text)).filter(x=>{let z=x.path+' '+(typeof x.value==='object'?'':String(x.value));return(ci?z.toLowerCase():z).includes(q)}).map(x=>`${x.path}\t${x.type}\t${typeof x.value==='object'?'':JSON.stringify(x.value)}`).join('\n')||'(no matches)'});
+reg('jsonstats','Show JSON structural statistics.','jsonstats [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),w=walkJSON(JSON.parse(s.text)),d=Math.max(...w.map(x=>(x.path.match(/[.\[]/g)||[]).length));return`nodes: ${w.length}\nobjects: ${w.filter(x=>x.type==='object').length}\narrays: ${w.filter(x=>x.type==='array').length}\nscalars: ${w.filter(x=>!['object','array'].includes(x.type)).length}\nmax depth: ${d}`});
+reg('jsondiff','Structural JSON diff.','jsondiff #1 #2',async({a})=>{let{left,right}=resolveTwoFiles(a),d=jsonDiffWalk(JSON.parse(left.text),JSON.parse(right.text));return d.length?d.map(x=>x.kind==='CHANGED'?`CHANGED ${x.path}\n  #${left.id}: ${JSON.stringify(x.a)}\n  #${right.id}: ${JSON.stringify(x.b)}`:`${x.kind} ${x.path}\n  ${JSON.stringify(x.a??x.b)}`).join('\n\n'):'JSON documents are structurally identical.'});
+reg('diffjson','Alias of jsondiff.','diffjson #1 #2',async({a})=>C.jsondiff.f({a,input:''}));
+reg('jsonschemaexample','Generate example JSON from a schema.','jsonschemaexample [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input);return JSON.stringify(exampleFromSchema(JSON.parse(s.text)),null,2)});
+reg('jsonfaker','Generate mock JSON from a schema.','jsonfaker [count=1] [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),n=Math.max(1,Math.min(100,Number(s.args[0])||1)),sc=JSON.parse(s.text),v=Array.from({length:n},(_,i)=>mockFromSchema(sc,i));return JSON.stringify(n===1?v[0]:v,null,2)});
+reg('xml2json','Convert XML to JSON.','xml2json [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),d=new DOMParser().parseFromString(s.text,'application/xml');if(d.querySelector('parsererror'))throw Error('Invalid XML');return JSON.stringify({[d.documentElement.nodeName]:xmlNodeToObj(d.documentElement)},null,2)});
+reg('json2xml','Convert JSON to XML.','json2xml [root] [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),o=JSON.parse(s.text),root=s.args[0]||((o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o).length===1)?Object.keys(o)[0]:'root'),v=(o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o).length===1&&root in o)?o[root]:o;return'<?xml version="1.0" encoding="UTF-8"?>\n'+objToXML(root,v)});
+reg('xpath','Evaluate XPath against XML.','xpath <expression> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),xp=s.args.join(' ');if(!xp)throw Error('Provide XPath.');let d=new DOMParser().parseFromString(s.text,'application/xml');if(d.querySelector('parsererror'))throw Error('Invalid XML');let r=d.evaluate(xp,d,null,XPathResult.ANY_TYPE,null),out=[],n;if(r.resultType===XPathResult.STRING_TYPE)return r.stringValue;if(r.resultType===XPathResult.NUMBER_TYPE)return String(r.numberValue);if(r.resultType===XPathResult.BOOLEAN_TYPE)return String(r.booleanValue);while(n=r.iterateNext())out.push(n.outerHTML||n.textContent);return out.join('\n')||'(no matches)'});
+reg('xmlstats','Show XML structural statistics.','xmlstats [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),d=new DOMParser().parseFromString(s.text,'application/xml');if(d.querySelector('parsererror'))throw Error('Invalid XML');let els=[...d.getElementsByTagName('*')],attrs=els.reduce((n,e)=>n+e.attributes.length,0),names=new Set(els.map(e=>e.nodeName));return`root: ${d.documentElement.nodeName}\nelements: ${els.length}\nattributes: ${attrs}\nunique element names: ${names.size}`});
+reg('xmlvalidate','Check XML well-formedness; optionally compare expected root.','xmlvalidate [rootName] [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),d=new DOMParser().parseFromString(s.text,'application/xml');if(d.querySelector('parsererror'))return'INVALID XML';let want=s.args[0];if(want&&d.documentElement.nodeName!==want)return`INVALID: expected root ${want}, got ${d.documentElement.nodeName}`;return'VALID well-formed XML (browser does not perform XSD validation)'});
+reg('csvheaders','List CSV columns and positions.','csvheaders [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),x=csvObjects(s.text);return x.headers.map((h,i)=>`${i+1}\t${h}`).join('\n')});
+reg('csvselect','Select CSV columns.','csvselect col1 col2 ... [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),x=csvObjects(s.text),hs=s.args;if(!hs.length)throw Error('Provide columns.');return csvOut(hs,x.objects)});
+reg('csvdrop','Drop CSV columns.','csvdrop col1 col2 ... [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),x=csvObjects(s.text),drop=new Set(s.args),hs=x.headers.filter(k=>!drop.has(k));return csvOut(hs,x.objects)});
+reg('csvwhere','Filter CSV rows with simple comparison.','csvwhere <column> <op> <value> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),[col,op,...vr]=s.args,val=vr.join(' '),x=csvObjects(s.text);if(!col||!op)throw Error('Use: csvwhere <column> =|!=|>|<|>=|<=|contains <value>');let ok=o=>{let c=cmpScalar(o[col],val);return op==='='?String(o[col])===val:op==='!='?String(o[col])!==val:op==='>'?c>0:op==='<'?c<0:op==='>='?c>=0:op==='<='?c<=0:op==='contains'?String(o[col]).includes(val):false};return csvOut(x.headers,x.objects.filter(ok))});
+reg('csvsort','Sort CSV by column.','csvsort <column> [desc] [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),col=s.args[0];if(!col)throw Error('Provide column.');let desc=(s.args[1]||'').toLowerCase()==='desc',x=csvObjects(s.text),o=[...x.objects].sort((a,b)=>cmpScalar(a[col],b[col]));if(desc)o.reverse();return csvOut(x.headers,o)});
+reg('csvdistinct','Distinct values for a CSV column.','csvdistinct <column> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),col=s.args[0],x=csvObjects(s.text);if(!col)throw Error('Provide column.');return[...new Set(x.objects.map(o=>o[col]??''))].sort().join('\n')});
+reg('csvgroup','Group/count a CSV column.','csvgroup <column> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),col=s.args[0];if(!col)throw Error('Provide column.');let x=csvObjects(s.text),m=new Map();for(const o of x.objects)m.set(o[col],(m.get(o[col])||0)+1);return[...m.entries()].sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${v}\t${k}`).join('\n')});
+reg('csvstats','Profile CSV columns.','csvstats [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),x=csvObjects(s.text);return x.headers.map(h=>{let v=x.objects.map(o=>o[h]??''),non=v.filter(z=>z!==''),nums=non.map(Number),numeric=non.length&&nums.every(n=>!isNaN(n));return`${h}\trows=${v.length}\tblank=${v.length-non.length}\tdistinct=${new Set(non).size}\ttype=${numeric?'number':'string'}${numeric?`\tmin=${Math.min(...nums)}\tmax=${Math.max(...nums)}`:''}`}).join('\n')});
+reg('csvjoin','Inner join two CSV files on columns.','csvjoin #1 #2 <leftCol> [rightCol]',async({a})=>{if(a.length<3)throw Error('Use: csvjoin #1 #2 <leftCol> [rightCol]');let l=resolveFileRequired(a[0]),r=resolveFileRequired(a[1]),lc=a[2],rc=a[3]||lc,L=csvObjects(l.text),R=csvObjects(r.text),idx=new Map();for(const o of R.objects){let k=o[rc];if(!idx.has(k))idx.set(k,[]);idx.get(k).push(o)}let hs=[...L.headers,...R.headers.filter(x=>x!==rc&&!L.headers.includes(x))],rows=[];for(const o of L.objects)for(const q of idx.get(o[lc])||[])rows.push({...o,...Object.fromEntries(Object.entries(q).filter(([k])=>k!==rc&&!L.headers.includes(k))) });return csvOut(hs,rows)});
+reg('intersect','Lines common to two files.','intersect #1 #2',async({a})=>{let{left,right}=resolveTwoFiles(a),B=setLines(right.text);return[...setLines(left.text)].filter(x=>B.has(x)).join('\n')});
+reg('subtract','Lines in first file but not second.','subtract #1 #2',async({a})=>{let{left,right}=resolveTwoFiles(a),B=setLines(right.text);return[...setLines(left.text)].filter(x=>!B.has(x)).join('\n')});
+reg('union','Unique union of lines from two files.','union #1 #2',async({a})=>{let{left,right}=resolveTwoFiles(a);return[...new Set([...setLines(left.text),...setLines(right.text)])].join('\n')});
+reg('symmetricdiff','Lines appearing on only one side.','symmetricdiff #1 #2',async({a})=>{let{left,right}=resolveTwoFiles(a),A=setLines(left.text),B=setLines(right.text);return[...[...A].filter(x=>!B.has(x)),...[...B].filter(x=>!A.has(x))].join('\n')});
+reg('difflines','Context-style line diff.','difflines #1 #2',async({a})=>C.diff.f({a,input:''}));
+reg('diffxml','Whitespace-normalized XML diff.','diffxml #1 #2',async({a})=>{let{left,right}=resolveTwoFiles(a),n=t=>t.replace(/>\s+</g,'><').replace(/\s+/g,' ').trim();return n(left.text)===n(right.text)?'XML documents match after whitespace normalization.':C.diff.f({a,input:''})});
+reg('curl','Generate a curl command.','curl <METHOD> <url> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),method=(s.args[0]||'GET').toUpperCase(),url=s.args[1];if(!url)throw Error('Use: curl <METHOD> <url> [#id|filename]');let out=`curl -X ${method} "${url}"`;if(s.text.trim())out+=` \\\n  -H "Content-Type: application/json" \\\n  --data '${s.text.replace(/'/g,"'\\''")}'`;return out});
+reg('curl2fetch','Convert pasted curl to JavaScript fetch.','curl2fetch [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),c=parseCurl(s.text),o={method:c.method};if(Object.keys(c.headers).length)o.headers=c.headers;if(c.data)o.body=c.data;return`fetch(${JSON.stringify(c.url)}, ${JSON.stringify(o,null,2)});`});
+reg('fetch2curl','Convert simple fetch() to curl.','fetch2curl [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input);return fetchToCurlText(s.text)});
+reg('headers','Parse HTTP headers to JSON.','headers [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),o={};for(const ln of lines(s.text)){let i=ln.indexOf(':');if(i>0)o[ln.slice(0,i).trim()]=ln.slice(i+1).trim()}return JSON.stringify(o,null,2)});
+reg('basicauth','Generate HTTP Basic Authorization header.','basicauth <user> <password>',async({a})=>{if(a.length<2)throw Error('Use: basicauth <user> <password>');return'Authorization: Basic '+btoa(unescape(encodeURIComponent(a[0]+':'+a.slice(1).join(' '))))});
+reg('bearer','Generate HTTP Bearer Authorization header.','bearer <token>',async({rest})=>{const token=unq(rest).trim();if(!token)throw Error('Provide bearer token.');return`Authorization: Bearer ${token}`});
+reg('httpstatus','Explain common HTTP status code.','httpstatus <code>',async({a})=>{if(!a[0])throw Error('Provide an HTTP status code.');const m={200:'OK',201:'Created',202:'Accepted',204:'No Content',301:'Moved Permanently',302:'Found',304:'Not Modified',400:'Bad Request',401:'Unauthorized',403:'Forbidden',404:'Not Found',409:'Conflict',422:'Unprocessable Content',429:'Too Many Requests',500:'Internal Server Error',502:'Bad Gateway',503:'Service Unavailable',504:'Gateway Timeout'};return`${a[0]} ${m[a[0]]||'Unknown/less common status'}`});
+reg('uuidvalidate','Validate a UUID.','uuidvalidate <uuid>',async({rest})=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(unq(rest).trim())?'VALID UUID':'INVALID UUID');
+reg('uuidversion','Show UUID version.','uuidversion <uuid>',async({rest})=>{let s=unq(rest).trim();if(!/^[0-9a-f-]{36}$/i.test(s))throw Error('Invalid UUID');return`UUID version ${s[14]}`});
+reg('ulid','Generate ULID-like sortable identifier.','ulid',async()=>{const A='0123456789ABCDEFGHJKMNPQRSTVWXYZ';let t=Date.now(),s='';for(let i=0;i<10;i++){s=A[t%32]+s;t=Math.floor(t/32)}let r=new Uint8Array(10);crypto.getRandomValues(r);for(let i=0;i<16;i++)s+=A[(r[i%10]+i*17)%32];return s});
+reg('randombytes','Generate cryptographically random bytes.','randombytes [count=32] [hex|base64]',async({a})=>{let n=Math.max(1,Math.min(65536,Number(a[0])||32)),b=new Uint8Array(n);crypto.getRandomValues(b);return(a[1]||'hex')==='base64'?bytesToB64(b):hexBytes(b)});
+reg('hmac','Create HMAC.','hmac sha256 <key> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),alg=(s.args.shift()||'sha256').toUpperCase().replace('SHA','SHA-'),key=s.args.join(' ');if(!key)throw Error('Provide HMAC key.');let k=await crypto.subtle.importKey('raw',TE.encode(key),{name:'HMAC',hash:alg},false,['sign']),sig=new Uint8Array(await crypto.subtle.sign('HMAC',k,TE.encode(s.text)));return hexBytes(sig)});
+reg('pbkdf2','Derive a key with PBKDF2-SHA256.','pbkdf2 <password> [iterations=100000] [salt]',async({a})=>{let pw=a[0];if(!pw)throw Error('Provide password.');let it=Number(a[1])||100000,salt=a[2]||'tgtt-salt',base=await crypto.subtle.importKey('raw',TE.encode(pw),'PBKDF2',false,['deriveBits']),bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:TE.encode(salt),iterations:it},base,256);return`salt=${salt}\niterations=${it}\nkey=${hexBytes(new Uint8Array(bits))}`});
+reg('aes','AES-GCM encrypt/decrypt with password-derived key.','aes encrypt|decrypt <password> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),mode=s.args.shift(),pw=s.args.join(' ');if(!pw)throw Error('Provide password.');if(mode==='encrypt'){let salt=new Uint8Array(16),iv=new Uint8Array(12);crypto.getRandomValues(salt);crypto.getRandomValues(iv);let base=await crypto.subtle.importKey('raw',TE.encode(pw),'PBKDF2',false,['deriveKey']),key=await crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt,iterations:100000},base,{name:'AES-GCM',length:256},false,['encrypt']),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,TE.encode(s.text)));return JSON.stringify({alg:'AES-GCM',kdf:'PBKDF2-SHA256',iterations:100000,salt:bytesToB64(salt),iv:bytesToB64(iv),ciphertext:bytesToB64(ct)},null,2)}if(mode==='decrypt'){let o=JSON.parse(s.text),salt=b64uBytes(o.salt),iv=b64uBytes(o.iv),ct=b64uBytes(o.ciphertext),base=await crypto.subtle.importKey('raw',TE.encode(pw),'PBKDF2',false,['deriveKey']),key=await crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt,iterations:o.iterations||100000},base,{name:'AES-GCM',length:256},false,['decrypt']);return TD.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct))}throw Error('Modes: encrypt decrypt')});
+reg('peminspect','Identify PEM blocks.','peminspect [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),b=pemBlocks(s.text);return b.length?b.map((x,i)=>`${i+1}. ${x.type} (${Math.floor(x.body.length*3/4)} approx DER bytes)`).join('\n'):'No PEM blocks found.'});
+reg('certinspect','Inspect PEM certificate fingerprint/type.','certinspect [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),b=pemBlocks(s.text).find(x=>x.type==='CERTIFICATE');if(!b)throw Error('No CERTIFICATE PEM block found.');let der=b64uBytes(b.body),fp=new Uint8Array(await crypto.subtle.digest('SHA-256',der));return`type: X.509 certificate\nDER bytes: ${der.length}\nSHA-256 fingerprint: ${[...fp].map(x=>x.toString(16).padStart(2,'0')).join(':').toUpperCase()}`});
+reg('semver','Compare or sort semantic versions.','semver compare <a> <b> | semver sort [#id|filename]',async({a,input})=>{let m=a.shift()||'compare';if(m==='compare'){let c=semverCmp(a[0],a[1]);return c===0?'equal':c<0?`${a[0]} < ${a[1]}`:`${a[0]} > ${a[1]}`}if(m==='sort'){let s=resolveTextSource(a,input);return lines(s.text).filter(Boolean).sort(semverCmp).join('\n')}throw Error('Modes: compare sort')});
+reg('escape','Escape text for regex/json/sql/shell.','escape regex|json|sql|shell [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),m=s.args[0]||'regex',t=s.text;if(m==='regex')return regexEscape(t);if(m==='json')return JSON.stringify(t).slice(1,-1);if(m==='sql')return t.replace(/'/g,"''");if(m==='shell')return"'"+t.replace(/'/g,"'\\''")+"'";throw Error('Modes: regex json sql shell')});
+reg('unescape','Unescape JSON-style escaped text.','unescape [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),t=s.text.replace(/\r/g,'\\r').replace(/\n/g,'\\n').replace(/"/g,'\\"');return JSON.parse('"'+t+'"')});
+reg('identifier','Convert text to identifier case.','identifier camel|pascal|snake|kebab|constant [text]',async({a,rest,input})=>{let m=a[0]||'camel',inline=unq(rest.replace(/^\s*\S+\s*/,'')),t=inputOf(inline);if(!t.trim())throw Error('Provide text inline or in the Scratch Pad.');return wordCase(t,m)});
+reg('template','Replace ${name} tokens using JSON data.','template <templateRef> <jsonRef>',async({a})=>{if(a.length<2)throw Error('Use: template <templateRef> <jsonRef>');let t=resolveFileRequired(a[0]).text,o=JSON.parse(resolveFileRequired(a[1]).text);return t.replace(/\$\{([^}]+)\}/g,(_,k)=>pathGet(o,'$.'+k)??'')});
+reg('cidr','Calculate IPv4 CIDR/subnet details.','cidr <address/bits>',async({a})=>{let x=cidrInfo(a[0]);return Object.entries(x).map(([k,v])=>`${k}: ${v}`).join('\n')});
+reg('ip2int','Convert IPv4 to unsigned integer.','ip2int <address>',async({a})=>String(ipToInt(a[0])));
+reg('int2ip','Convert unsigned integer to IPv4.','int2ip <number>',async({a})=>intToIp(a[0]));
+reg('iprange','Show first/last addresses for CIDR.','iprange <address/bits>',async({a})=>{let x=cidrInfo(a[0]);return`${x.first}\n${x.last}`});
+reg('mac','Validate/normalize MAC address.','mac <address>',async({rest})=>{let s=unq(rest).replace(/[^0-9a-f]/gi,'').toUpperCase();if(s.length!==12)throw Error('Invalid MAC address');return s.match(/../g).join(':')});
+reg('manifest','List workspace file inventory.','manifest',async()=>workspaceFiles.map(f=>`#${f.id}\t${f.name}\t${f.size}\t${f.type||''}`).join('\n')||'(no files)');
+reg('findfiles','Find workspace filenames.','findfiles <text>',async({rest})=>{let q=unq(rest).toLowerCase();return workspaceFiles.filter(f=>f.name.toLowerCase().includes(q)).map(fileLabel).join('\n')||'(no matches)'});
+reg('concatfiles','Concatenate workspace files.','concatfiles #1 #2 ...',async({a})=>{if(!a.length)throw Error('Provide one or more workspace file references.');return a.map(x=>resolveFileRequired(x).text).join('\n')});
+reg('workspacehash','Hash every workspace file.','workspacehash [sha256]',async({a})=>{let alg=(a[0]||'sha256').toUpperCase().replace('SHA','SHA-');let out=[];for(const f of workspaceFiles)out.push(`${await hash(alg,TE.encode(f.text))}\t#${f.id}\t${f.name}`);return out.join('\n')});
+reg('duplicatefiles','Find identical workspace files by SHA-256.','duplicatefiles',async()=>{let m=new Map();for(const f of workspaceFiles){let x=await hash('SHA-256',TE.encode(f.text));if(!m.has(x))m.set(x,[]);m.get(x).push(f)}let g=[...m.entries()].filter(([,a])=>a.length>1);return g.length?g.map(([x,a])=>`${x}\n  ${a.map(fileLabel).join('\n  ')}`).join('\n\n'):'No identical files found.'});
+reg('csvfaker','Generate test CSV rows from header names.','csvfaker <count> [#id|filename]',async({a,input})=>{let s=resolveTextSource(a,input),n=Math.max(1,Math.min(10000,Number(s.args[0])||10)),H=parseCSV(s.text)[0]||lines(s.text)[0].split(',');let o=Array.from({length:n},(_,i)=>Object.fromEntries(H.map(h=>[h,`${h}_${i+1}`])));return csvOut(H,o)});
+
+reg('sql','SQL helpers.','sql format|quote|in',async({a,input})=>{let m=a[0]||'format';if(m==='format')return sqlFmt(input);if(m==='quote')return lines(input).filter(Boolean).map(x=>`'${x.replace(/'/g,"''")}'`).join('\n');if(m==='in'){let v=lines(input).map(x=>x.trim()).filter(Boolean).map(x=>`'${x.replace(/'/g,"''")}'`);return`IN (\n  ${v.join(',\n  ')}\n)`}throw Error('Modes: format quote in')});
+reg('jwt','Decode JWT header/payload locally.','jwt decode [token]',async({rest,input})=>{let t=inputOf(rest.replace(/^\s*\S+\s*/,'')),p=t.trim().split('.');if(p.length<2)throw Error('Invalid JWT');let D=x=>JSON.parse(b64d(x.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(x.length/4)*4,'=')));return JSON.stringify({header:D(p[0]),payload:D(p[1]),signature:p[2]||''},null,2)});reg('cron','Explain 5-field cron.','cron "0 8 * * 1-5"',async({rest,input})=>{let p=(unq(rest)||input).trim().split(/\s+/);if(p.length!==5)throw Error('Expected 5 fields');return`minute=${p[0]}, hour=${p[1]}, day-of-month=${p[2]}, month=${p[3]}, day-of-week=${p[4]}`});reg('detect','Guess input type.','detect',async({input})=>typeDetect(input));reg('mime','Guess MIME from filename.','mime filename.ext',async({rest})=>{let e=unq(rest).split('.').pop().toLowerCase(),m={json:'application/json',csv:'text/csv',xml:'application/xml',html:'text/html',txt:'text/plain',sql:'text/plain',js:'text/javascript',css:'text/css',md:'text/markdown',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',pdf:'application/pdf'};return m[e]||'application/octet-stream'});reg('ascii','Unicode/code-point lookup.','ascii <char|number>',async({rest})=>{let v=unq(rest);if(/^\d+$/.test(v))return`${v} = ${String.fromCodePoint(+v)}`;return[...v].map(c=>`${c} = ${c.codePointAt(0)} = U+${c.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')}`).join('\n')},['unicode']);reg('lorem','Generate lorem words.','lorem [words]',async({a})=>{let b='lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'.split(' '),n=Math.min(5000,Math.max(1,+a[0]||50));return Array.from({length:n},(_,i)=>b[i%b.length]).join(' ')+'.'});reg('sequence','Generate numeric sequence.','sequence <start> <end> [step]',async({a})=>{let x=+a[0],e=+a[1],s=+a[2]||1;if(![x,e,s].every(Number.isFinite)||!s)throw Error('Invalid sequence');let o=[];for(;s>0?x<=e:x>=e;x+=s){o.push(x);if(o.length>100000)break}return o.join('\n')});
+
+
+reg('files','List in-memory workspace files.','files',async()=>workspaceFiles.length?workspaceFiles.map(f=>`${f.id===activeFileId?'*':' '} #${f.id}  ${f.name}  ${human(f.size)}`).join('\n')+'\n\n* = active':'(no files loaded)');
+reg('use','Make a workspace file active.','use #id|filename',async({a})=>{let f=resolveFileRef(a.join(' '));if(!f||Array.isArray(f))throw Error('File not found.');activeFileId=f.id;ui.scratch.value=f.text;refreshFileBox();renderWorkspace();return`Active ${fileLabel(f)}`});
+reg('cat','Show a workspace file.','cat #id|filename',async({a})=>{let f=resolveFileRef(a.join(' '));if(!f||Array.isArray(f))throw Error('File not found.');return f.text});
+reg('remove','Remove a workspace file.','remove #id|filename',async({a})=>{let f=resolveFileRef(a.join(' '));if(!f||Array.isArray(f))throw Error('File not found.');workspaceFiles=workspaceFiles.filter(x=>x.id!==f.id);if(activeFileId===f.id)activeFileId=workspaceFiles[0]?.id||null;if(activeFile())ui.scratch.value=activeFile().text;refreshFileBox();renderWorkspace();return`Removed ${fileLabel(f)}`});
+reg('clearfiles','Remove all workspace files.','clearfiles',async()=>{workspaceFiles=[];activeFileId=null;refreshFileBox();renderWorkspace();return'Workspace cleared.'});
+reg('rename','Rename a workspace file.','rename #id newname.sql',async({a})=>{if(a.length<2)throw Error('Use: rename #id newname.sql');let f=resolveFileRef(a[0]);if(!f||Array.isArray(f))throw Error('File not found.');let old=f.name;f.name=a.slice(1).join(' ');refreshFileBox();renderWorkspace();return`Renamed ${old} -> ${f.name}`});
+
+
+reg('nl','Number every line.','nl [start=1] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),start=Math.max(1,Number(src.args[0]||1)||1);
+  return numberedLines(src.text,start);
+});
+reg('line','Show one line by number.','line <number> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),n=Number(src.args[0]);
+  if(!Number.isInteger(n)||n<1)throw Error('Use: line <number> [#id|filename]');
+  const arr=lines(src.text);if(n>arr.length)throw Error(`Line ${n} is beyond end of input (${arr.length} lines).`);
+  return `${matchLineLabel(src,n)}: ${arr[n-1]}`;
+});
+reg('range','Show an inclusive line range.','range <start> <end> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),s=Number(src.args[0]),e=Number(src.args[1]);
+  if(!Number.isInteger(s)||!Number.isInteger(e)||s<1||e<s)throw Error('Use: range <start> <end> [#id|filename]');
+  const arr=lines(src.text),last=Math.min(e,arr.length),out=[];
+  for(let n=s;n<=last;n++)out.push(`${matchLineLabel(src,n)}: ${arr[n-1]}`);
+  return out.join('\n')||'(range is beyond end of input)';
+});
+reg('findtext','Find literal text with line numbers.','findtext [-i] <text> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),args=src.args,insensitive=false;
+  if(args[0]==='-i'){insensitive=true;args.shift()}
+  const needle=args.join(' ');if(!needle)throw Error('Use: findtext [-i] <text> [#id|filename]');
+  const q=insensitive?needle.toLowerCase():needle,out=[];
+  lines(src.text).forEach((ln,i)=>{const hay=insensitive?ln.toLowerCase():ln;if(hay.includes(q))out.push(`${matchLineLabel(src,i+1)}: ${ln}`)});
+  return out.join('\n')||'(no matches)';
+});
+reg('countmatch','Count regex-matching lines.','countmatch [-i] <regex> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),args=src.args,flags='';
+  if(args[0]==='-i'){flags='i';args.shift()}
+  if(!args.length)throw Error('Use: countmatch [-i] <regex> [#id|filename]');
+  const rx=rFrom(args.join(' '),flags);let count=0;
+  lines(src.text).forEach(ln=>{rx.lastIndex=0;if(rx.test(ln))count++});
+  return String(count);
+});
+reg('context','Show matching lines with surrounding context.','context <regex> [before=2] [after=2] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),args=src.args;if(!args.length)throw Error('Use: context <regex> [before] [after] [#id|filename]');
+  let before=2,after=2;
+  if(args.length>=3&&/^\d+$/.test(args[args.length-1])&&/^\d+$/.test(args[args.length-2])){
+    after=Number(args.pop());before=Number(args.pop());
+  }
+  const rx=rFrom(args.join(' ')),arr=lines(src.text),wanted=new Set(),matches=[];
+  arr.forEach((ln,i)=>{rx.lastIndex=0;if(rx.test(ln)){matches.push(i);for(let j=Math.max(0,i-before);j<=Math.min(arr.length-1,i+after);j++)wanted.add(j)}});
+  if(!matches.length)return '(no matches)';
+  const out=[];let prev=-2;
+  [...wanted].sort((x,y)=>x-y).forEach(i=>{if(i>prev+1)out.push('------');out.push(`${matchLineLabel(src,i+1)}: ${arr[i]}`);prev=i});
+  return out.join('\n');
+});
+reg('blank','Keep only blank lines, with line numbers.','blank [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),out=[];
+  lines(src.text).forEach((ln,i)=>{if(!ln.trim())out.push(`${matchLineLabel(src,i+1)}:`)});
+  return out.join('\n')||'(no blank lines)';
+});
+reg('nonblank','Keep nonblank lines, with line numbers.','nonblank [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),out=[];
+  lines(src.text).forEach((ln,i)=>{if(ln.trim())out.push(`${matchLineLabel(src,i+1)}: ${ln}`)});
+  return out.join('\n')||'(no nonblank lines)';
+});
+reg('longest','Show the longest lines.','longest [count=10] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),n=Math.min(100,Math.max(1,Number(src.args[0]||10)||10));
+  return lines(src.text).map((text,i)=>({text,line:i+1,len:text.length})).sort((a,b)=>b.len-a.len||a.line-b.line).slice(0,n).map(x=>`${matchLineLabel(src,x.line)} [${x.len} chars]: ${x.text}`).join('\n');
+});
+reg('shortest','Show the shortest nonblank lines.','shortest [count=10] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),n=Math.min(100,Math.max(1,Number(src.args[0]||10)||10));
+  return lines(src.text).map((text,i)=>({text,line:i+1,len:text.length})).filter(x=>x.text.trim()).sort((a,b)=>a.len-b.len||a.line-b.line).slice(0,n).map(x=>`${matchLineLabel(src,x.line)} [${x.len} chars]: ${x.text}`).join('\n');
+});
+reg('contains','Test whether input contains text.','contains [-i] <text> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),args=src.args,ins=false;if(args[0]==='-i'){ins=true;args.shift()}
+  const q=args.join(' ');if(!q)throw Error('Use: contains [-i] <text> [#id|filename]');
+  return String((ins?src.text.toLowerCase():src.text).includes(ins?q.toLowerCase():q));
+});
+
+
+reg('trim','Trim whitespace from input or every line.','trim [all|lines] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),mode=(src.args[0]||'all').toLowerCase();
+  if(mode==='all')return src.text.trim();
+  if(mode==='lines')return lines(src.text).map(x=>x.trim()).join('\n');
+  throw Error('Modes: all lines');
+});
+reg('reverse','Reverse text, words, or lines.','reverse chars|words|lines [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),mode=(src.args[0]||'lines').toLowerCase();
+  if(mode==='chars')return [...src.text].reverse().join('');
+  if(mode==='words')return src.text.trim().split(/\s+/).reverse().join(' ');
+  if(mode==='lines')return lines(src.text).reverse().join('\n');
+  throw Error('Modes: chars words lines');
+});
+reg('shuffle','Shuffle input lines.','shuffle [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),arr=lines(src.text);
+  for(let i=arr.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+  return arr.join('\n');
+});
+reg('sample','Return N random input lines.','sample [count=10] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),n=Math.min(10000,Math.max(1,Number(src.args[0]||10)||10)),arr=lines(src.text);
+  for(let i=arr.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+  return arr.slice(0,n).join('\n');
+});
+reg('frequency','Count repeated lines.','frequency [top=25] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),top=Math.min(1000,Math.max(1,Number(src.args[0]||25)||25)),m=new Map();
+  for(const x of lines(src.text))m.set(x,(m.get(x)||0)+1);
+  return [...m.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,top).map(([x,n])=>`${String(n).padStart(7)}  ${x}`).join('\n');
+});
+reg('duplicates','Show duplicate lines and counts.','duplicates [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),m=new Map();
+  for(const x of lines(src.text))m.set(x,(m.get(x)||0)+1);
+  return [...m.entries()].filter(x=>x[1]>1).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).map(([x,n])=>`${String(n).padStart(7)}  ${x}`).join('\n')||'(no duplicates)';
+});
+reg('sortnum','Sort lines numerically.','sortnum [desc] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),desc=(src.args[0]||'').toLowerCase()==='desc';
+  return lines(src.text).sort((x,y)=>{let a=parseFloat(x),b=parseFloat(y);if(!Number.isFinite(a)&&!Number.isFinite(b))return x.localeCompare(y);if(!Number.isFinite(a))return 1;if(!Number.isFinite(b))return -1;return desc?b-a:a-b}).join('\n');
+});
+reg('prefix','Prefix every line.','prefix <text> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),p=src.args.join(' ');if(!p)throw Error('Use: prefix <text> [#id|filename]');
+  return lines(src.text).map(x=>p+x).join('\n');
+});
+reg('suffix','Suffix every line.','suffix <text> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),p=src.args.join(' ');if(!p)throw Error('Use: suffix <text> [#id|filename]');
+  return lines(src.text).map(x=>x+p).join('\n');
+});
+reg('between','Extract text between two delimiters.','between <start> <end> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input);if(src.args.length<2)throw Error('Use: between <start> <end> [#id|filename]');
+  let s=src.args[0],e=src.args[1],out=[],from=0;
+  while(true){let i=src.text.indexOf(s,from);if(i<0)break;i+=s.length;let j=src.text.indexOf(e,i);if(j<0)break;out.push(src.text.slice(i,j));from=j+e.length}
+  return out.join('\n')||'(none found)';
+});
+reg('slice','Slice characters from input.','slice <start> [end] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),s=Number(src.args[0]),e=src.args[1]===undefined?undefined:Number(src.args[1]);
+  if(!Number.isInteger(s)||(e!==undefined&&!Number.isInteger(e)))throw Error('Use: slice <start> [end] [#id|filename]');
+  return src.text.slice(s,e);
+});
+reg('words','List/count words.','words list|count|unique [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),mode=(src.args[0]||'count').toLowerCase(),w=src.text.trim()?src.text.trim().split(/\s+/):[];
+  if(mode==='count')return String(w.length);
+  if(mode==='list')return w.join('\n');
+  if(mode==='unique')return uniq(w).join('\n');
+  throw Error('Modes: list count unique');
+});
+reg('chars','List/count characters or code points.','chars count|unique|codes [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),mode=(src.args[0]||'count').toLowerCase(),c=[...src.text];
+  if(mode==='count')return String(c.length);
+  if(mode==='unique')return uniq(c).join('');
+  if(mode==='codes')return c.map(x=>`${x}\tU+${x.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')}`).join('\n');
+  throw Error('Modes: count unique codes');
+});
+reg('slug','Convert text to a URL-friendly slug.','slug [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input);
+  return src.text.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+});
+reg('repeat','Repeat text N times.','repeat <count> [separator] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),raw=src.args[0];if(raw===undefined||!/^\d+$/.test(raw))throw Error('Provide a non-negative integer count.');
+  let n=Math.min(10000,Math.max(0,Number(raw))),sep=src.args[1]===undefined?'\n':src.args[1];
+  return Array.from({length:n},()=>src.text).join(sep);
+});
+reg('hex','Hex encode/decode UTF-8 text.','hex encode|decode [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),mode=(src.args[0]||'encode').toLowerCase();
+  if(mode==='encode')return [...TE.encode(src.text)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  if(mode==='decode'){let s=src.text.replace(/\s+/g,'');if(!/^[0-9a-f]*$/i.test(s)||s.length%2)throw Error('Invalid hex input');let b=new Uint8Array(s.match(/../g)?.map(x=>parseInt(x,16))||[]);return TD.decode(b)}
+  throw Error('Modes: encode decode');
+});
+reg('rot13','Apply ROT13 to text.','rot13 [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input);
+  return src.text.replace(/[A-Za-z]/g,c=>String.fromCharCode((c<='Z'?65:97)+(c.charCodeAt(0)-(c<='Z'?65:97)+13)%26));
+});
+reg('querystring','Parse/build URL query strings.','querystring parse|build',async({a,input})=>{
+  let mode=(a[0]||'parse').toLowerCase();
+  if(mode==='parse'){let q=input.trim().replace(/^\?/,'');let o={};for(const [k,v] of new URLSearchParams(q)){if(k in o)o[k]=Array.isArray(o[k])?[...o[k],v]:[o[k],v];else o[k]=v}return JSON.stringify(o,null,2)}
+  if(mode==='build'){let o=JSON.parse(input),q=new URLSearchParams();for(const [k,v] of Object.entries(o)){if(Array.isArray(v))v.forEach(x=>q.append(k,x));else q.append(k,v)}return q.toString()}
+  throw Error('Modes: parse build');
+});
+reg('jsonkeys','List JSON object keys.','jsonkeys [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),o=JSON.parse(src.text);if(o===null||typeof o!=='object'||Array.isArray(o))throw Error('Top-level JSON object required.');return Object.keys(o).join('\n');
+});
+reg('csvcol','Extract a CSV column by name or 1-based number.','csvcol <name|number> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),which=src.args[0];if(!which)throw Error('Use: csvcol <name|number> [#id|filename]');
+  let rows=parseCSV(src.text,','),idx;
+  if(/^\d+$/.test(which))idx=Number(which)-1;else idx=(rows[0]||[]).findIndex(x=>x===which);
+  if(idx<0)throw Error('Column not found.');
+  return rows.map(r=>r[idx]??'').join('\n');
+});
+reg('compare','Compare two workspace files.','compare #1 #2',async({a})=>{
+  let {left,right}=resolveTwoFiles(a),la=lines(left.text),lb=lines(right.text),max=Math.max(la.length,lb.length),same=0,diff=0;
+  for(let i=0;i<max;i++){if(la[i]===lb[i])same++;else diff++}
+  return `LEFT : ${fileLabel(left)}\nRIGHT: ${fileLabel(right)}\n\nbytes: ${left.size} vs ${right.size}\nlines: ${la.length} vs ${lb.length}\nmatching line positions: ${same}\ndifferent line positions: ${diff}\nidentical text: ${left.text===right.text?'yes':'no'}`;
+});
+reg('diff','Show a simple line-by-line file diff.','diff #1 #2',async({a})=>{
+  let {left,right}=resolveTwoFiles(a),la=lines(left.text),lb=lines(right.text),max=Math.max(la.length,lb.length),out=[];
+  out.push(`--- ${fileLabel(left)}`,`+++ ${fileLabel(right)}`);
+  for(let i=0;i<max;i++){if(la[i]===lb[i])continue;if(i<la.length)out.push(`- ${String(i+1).padStart(6)}: ${la[i]}`);if(i<lb.length)out.push(`+ ${String(i+1).padStart(6)}: ${lb[i]}`)}
+  return out.length>2?out.join('\n'):'(files are identical)';
+});
+
+reg('indent','Indent or outdent every input line.','indent [spaces=2] | indent -2',async({a,input})=>{
+  let n=Number(a[0]||2);if(!Number.isFinite(n))throw Error('Provide a numeric space count.');
+  return n>=0?lines(input).map(x=>' '.repeat(Math.min(40,n))+x).join('\n'):lines(input).map(x=>x.replace(new RegExp('^ {0,'+Math.min(40,Math.abs(n))+'}'), '')).join('\n');
+});
+reg('wrap','Wrap plain text to a target width.','wrap [width=80] [text]',async({a,rest,input})=>{
+  let w=80,inline='';
+  if(a[0]&&/^\d+$/.test(a[0])){
+    w=Math.min(300,Math.max(10,Number(a[0])));
+    inline=rest.replace(/^\s*\S+\s*/,'');
+  }else{
+    inline=rest;
+  }
+  const text=inputOf(inline);
+  if(!text.trim())return'(no input)';
+  let words=text.replace(/\s+/g,' ').trim().split(' '),out=[],line='';
+  for(const word of words){if(!line)line=word;else if(line.length+1+word.length<=w)line+=' '+word;else{out.push(line);line=word}}
+  if(line)out.push(line);
+  return out.join('\n');
+});
+reg('extract','Extract common tokens from text.','extract emails|urls|numbers',async({a,input})=>{
+  let m=(a[0]||'').toLowerCase(),rx;
+  if(m==='emails')rx=/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/ig;
+  else if(m==='urls')rx=/https?:\/\/[^\s"'<>]+/ig;
+  else if(m==='numbers')rx=/-?\b\d+(?:\.\d+)?\b/g;
+  else throw Error('Modes: emails urls numbers');
+  return uniq(input.match(rx)||[]).join('\n')||'(none found)';
+});
+
+reg('sshkey','Generate a local OpenSSH keypair.','sshkey ed25519 [comment] | sshkey rsa [bits] [comment]',async({a})=>{
+  let kind=(a.shift()||'ed25519').toLowerCase(),bits=4096,comment='tgtt-generated';
+  if(kind==='rsa'&&a[0]&&/^\d+$/.test(a[0]))bits=Number(a.shift());if(a.length)comment=a.join(' ');
+  lastSSH=await generateSSH(kind,bits,comment);
+  return `Generated locally in this browser. Key material was not transmitted anywhere.\n\nType: ${lastSSH.kind}${lastSSH.kind==='rsa'?' '+bits+' bit':''}\nFingerprint: ${lastSSH.fingerprint}\n\nPUBLIC KEY\n${lastSSH.publicKey}\n\nPRIVATE KEY\n${lastSSH.privateKey}`;
+});
+reg('sshpublic','Show the public key from the last generated SSH pair.','sshpublic',async()=>{if(!lastSSH)throw Error('No generated SSH keypair in this session. Run sshkey first.');return lastSSH.publicKey});
+reg('sshprivate','Show the private key from the last generated SSH pair.','sshprivate',async()=>{if(!lastSSH)throw Error('No generated SSH keypair in this session. Run sshkey first.');return lastSSH.privateKey});
+reg('sshfingerprint','Calculate an OpenSSH SHA256 fingerprint.','sshfingerprint [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),p=parseOpenSSHPublic(src.text);return `${p.type} ${await sshFingerprintFromBlob(p.blob)}${p.comment?' '+p.comment:''}`;
+});
+reg('sshinspect','Inspect an SSH public/private key.','sshinspect [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),t=src.text.trim();
+  if(t.includes('-----BEGIN OPENSSH PRIVATE KEY-----'))return `format: OpenSSH private key\nsource: ${src.label}`;
+  if(t.includes('-----BEGIN PRIVATE KEY-----'))return `format: PKCS#8 private key\nsource: ${src.label}`;
+  const p=parseOpenSSHPublic(t),fp=await sshFingerprintFromBlob(p.blob);
+  return `format: OpenSSH public key\ntype: ${p.type}\nfingerprint: ${fp}\ncomment: ${p.comment||'(none)'}\nsource: ${src.label}`;
+});
+reg('sshconfig','Generate an SSH config Host entry.','sshconfig <host> [user] [port] [identityFile]',async({a})=>{
+  if(!a[0])throw Error('Use: sshconfig <host> [user] [port] [identityFile]');
+  const host=a[0],user=a[1]||'',port=a[2]||'',id=a[3]||'';let out=[`Host ${host}`,`    HostName ${host}`];
+  if(user)out.push(`    User ${user}`);if(port)out.push(`    Port ${port}`);if(id)out.push(`    IdentityFile ${id}`);out.push('    IdentitiesOnly yes');return out.join('\n');
+});
+reg('authorizedkey','Format an authorized_keys entry.','authorizedkey [options] [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),opts=src.args.join(' '),p=parseOpenSSHPublic(src.text);return `${opts?opts+' ':''}${p.line}`;
+});
+reg('knownhost','Format a known_hosts entry from a public host key.','knownhost <hostname> [#id|filename]',async({a,input})=>{
+  let src=resolveTextSource(a,input),host=src.args.shift();if(!host)throw Error('Use: knownhost <hostname> [#id|filename]');
+  const p=parseOpenSSHPublic(src.text);return `${host} ${p.type} ${bytesToB64(p.blob)}`;
+});
+reg('sshsave','Save the last generated SSH keypair as two local files.','sshsave [basename]',async({a})=>{
+  if(!lastSSH)throw Error('No generated SSH keypair in this session. Run sshkey first.');
+  const base=(a[0]||'id_'+lastSSH.kind).replace(/[\\/:*?"<>|]+/g,'_');
+  function dl(name,text){let blob=new Blob([text+'\n'],{type:'text/plain'}),x=document.createElement('a');x.href=URL.createObjectURL(blob);x.download=name;x.click();setTimeout(()=>URL.revokeObjectURL(x.href),1000)}
+  dl(base,lastSSH.privateKey);dl(base+'.pub',lastSSH.publicKey);return `Saved ${base} and ${base}.pub locally.`;
+});
+
+
+function tgttInspectType(text,name='',type=''){
+  const t=String(text||'');
+  try{
+    const o=JSON.parse(t),w=walkJSON(o);
+    return {
+      detected:'JSON',
+      detail:[
+        `nodes: ${w.length}`,
+        `objects: ${w.filter(x=>x.type==='object').length}`,
+        `arrays: ${w.filter(x=>x.type==='array').length}`,
+        `scalars: ${w.filter(x=>!['object','array'].includes(x.type)).length}`,
+        `max depth: ${Math.max(0,...w.map(x=>(x.path.match(/[.\[]/g)||[]).length))}`
+      ]
+    };
+  }catch{}
+  if(/^\s*</.test(t)){
+    try{
+      const d=new DOMParser().parseFromString(t,'application/xml');
+      if(!d.querySelector('parsererror')){
+        return {detected:'XML/HTML-like',detail:[`root: ${d.documentElement?.nodeName||'(none)'}`,`elements: ${d.getElementsByTagName('*').length}`]};
+      }
+    }catch{}
+    return {detected:'XML/HTML-like',detail:[]};
+  }
+  if(t.includes(',')&&t.includes('\n')){
+    try{
+      const x=csvObjects(t);
+      return {detected:'CSV-like',detail:[`data rows: ${x.objects.length}`,`columns: ${x.headers.length}`,`headers: ${x.headers.join(', ')}`]};
+    }catch{}
+  }
+  return {detected:type||'text/binary',detail:[]};
+}
+
+async function tgttFetchRemote(rawUrl,kind){
+  const url=normalizeWebUrl(rawUrl);
+  ui.status.textContent=`Fetching ${url} …`;
+  let res;
+  try{
+    res=await fetch(url,{method:'GET',mode:'cors',credentials:'include',redirect:'follow',cache:'no-store'});
+  }catch(e){
+    throw Error(`Fetch failed for: ${url}\n\nThe remote site may block CORS, require authentication, or reject a file:// origin. TGTT does not use a proxy.\n\n${e.message||e}`);
+  }
+  if(!res.ok)throw Error(`Fetch returned HTTP ${res.status} ${res.statusText||''}`.trim());
+
+  const contentType=res.headers.get('content-type')||'';
+  const finalUrl=res.url||url;
+  let text=await res.text();
+
+  if(kind==='json'){
+    let o;
+    try{o=JSON.parse(text)}
+    catch(e){throw Error(`Response is not valid JSON: ${e.message||e}`)}
+    text=JSON.stringify(o,null,2);
+  }
+
+  const u=new URL(finalUrl);
+  let leaf=decodeURIComponent((u.pathname.split('/').filter(Boolean).pop()|| (kind==='json'?'response.json':'response.txt')));
+  leaf=leaf.replace(/[<>:"/\\|?*\x00-\x1f]+/g,'_').trim()||(kind==='json'?'response.json':'response.txt');
+  if(kind==='json'&&!/\.json$/i.test(leaf))leaf+='.json';
+  if(kind==='text'&&!/\.[A-Za-z0-9]{1,12}$/.test(leaf))leaf+='.txt';
+
+  const name=`${u.hostname}-${leaf}`;
+  const r={
+    id:nextFileId++,
+    name,
+    size:TE.encode(text).length,
+    type:kind==='json'?'application/json':(contentType.split(';')[0]||'text/plain'),
+    lastModified:Date.now(),
+    text,
+    file:null,
+    remoteUrl:finalUrl,
+    requestedUrl:url,
+    redirected:res.redirected||finalUrl!==url,
+    fetchCredentials:'include'
+  };
+  workspaceFiles.push(r);
+  activeFileId=r.id;
+  ui.scratch.value=text;
+  ui.status.textContent=`Fetched ${finalUrl} · active ${fileLabel(r)}`;
+  refreshFileBox();renderWorkspace();
+  return r;
+}
+
+reg('inspect','Automatically inspect a workspace file and report useful metadata/content hints.','inspect [#id|filename]',async({a})=>{
+  const f=resolveFileRef(a.join(' '));
+  if(!f||Array.isArray(f))throw Error('File not found.');
+  const info=tgttInspectType(f.text,f.name,f.type);
+  const bytes=TE.encode(f.text||'');
+  const magic=[...bytes.slice(0,16)].map(x=>x.toString(16).padStart(2,'0')).join(' ');
+  return [
+    `file: ${fileLabel(f)}`,
+    `name: ${f.name}`,
+    `type: ${f.type||'(unknown)'}`,
+    `size: ${f.size} (${human(f.size)})`,
+    `lines: ${lines(f.text||'').length}`,
+    `detected: ${info.detected}`,
+    `first bytes: ${magic||'(empty)'}`,
+    ...info.detail
+  ].join('\n');
+});
+
+reg('fetchjson','Fetch authenticated JSON, pretty-print it, and add it to the workspace.','fetchjson <url>',async({a})=>{
+  const raw=a.join(' ').trim();
+  if(!raw)throw Error('Use: fetchjson <url>');
+  const f=await tgttFetchRemote(raw,'json');
+  return `Fetched JSON into workspace as ${fileLabel(f)}
+Requested URL : ${f.requestedUrl}
+Final URL     : ${f.remoteUrl}
+Redirected    : ${f.redirected?'YES':'NO'}
+Credentials   : INCLUDE
+Type          : ${f.type}
+Size          : ${human(f.size)}`;
+});
+
+reg('fetchtext','Fetch authenticated remote text and add it to the Scratch Pad/workspace.','fetchtext <url>',async({a})=>{
+  const raw=a.join(' ').trim();
+  if(!raw)throw Error('Use: fetchtext <url>');
+  const f=await tgttFetchRemote(raw,'text');
+  return `Fetched text into workspace as ${fileLabel(f)}
+Requested URL : ${f.requestedUrl}
+Final URL     : ${f.remoteUrl}
+Redirected    : ${f.redirected?'YES':'NO'}
+Credentials   : INCLUDE
+Type          : ${f.type}
+Size          : ${human(f.size)}`;
+});
+
+reg('clone','Duplicate a workspace file, optionally with a new filename.','clone #id|filename [new filename]',async({a})=>{
+  if(!a.length)throw Error('Use: clone #id|filename [new filename]');
+  const f=resolveFileRef(a.shift());
+  if(!f||Array.isArray(f))throw Error('File not found.');
+  const name=(a.join(' ').trim()||`copy-${f.name}`).replace(/[<>:"/\\|?*\x00-\x1f]+/g,'_');
+  const c={
+    ...f,
+    id:nextFileId++,
+    name,
+    lastModified:Date.now(),
+    file:null
+  };
+  workspaceFiles.push(c);
+  activeFileId=c.id;
+  ui.scratch.value=c.text;
+  refreshFileBox();renderWorkspace();
+  return `Cloned ${fileLabel(f)} -> ${fileLabel(c)}`;
+});
+
+reg('workspaceinfo','Summarize the in-memory workspace and largest files.','workspaceinfo',async()=>{
+  const total=workspaceFiles.reduce((n,f)=>n+(Number(f.size)||0),0);
+  const sorted=[...workspaceFiles].sort((a,b)=>(b.size||0)-(a.size||0));
+  return `files: ${workspaceFiles.length}
+total size: ${human(total)}
+active: ${activeFile()?fileLabel(activeFile()):'(none)'}
+
+largest:
+${sorted.slice(0,10).map(f=>`${fileLabel(f)}\t${human(f.size||0)}`).join('\n')||'(none)'}`;
+});
+
+reg('logstats','Profile a text log for severity counts, timestamps, and repeated lines.','logstats [#id|filename]',async({a,input})=>{
+  const src=resolveTextSource(a,input),L=lines(src.text);
+  const count=rx=>L.filter(x=>rx.test(x)).length;
+  const timestamped=L.filter(x=>/\b\d{4}[-/]\d\d[-/]\d\d[ T]\d\d:\d\d(?::\d\d)?/.test(x)).length;
+  const freq=new Map();
+  for(const x of L)if(x)freq.set(x,(freq.get(x)||0)+1);
+  const repeated=[...freq.entries()].filter(([,n])=>n>1).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  return `source: ${src.label}
+lines: ${L.length}
+ERROR: ${count(/\bERROR\b/i)}
+WARN: ${count(/\bWARN(?:ING)?\b/i)}
+INFO: ${count(/\bINFO\b/i)}
+DEBUG: ${count(/\bDEBUG\b/i)}
+timestamped lines: ${timestamped}
+
+repeated lines:
+${repeated.map(([x,n])=>`${n}x ${x.slice(0,180)}`).join('\n')||'(none)'}`;
+});
+
+reg('sqlin','Convert lines/comma-separated values into an SQL IN (...) list with safe string quoting.','sqlin [values]',async({rest,input})=>{
+  const raw=rest.trim()||input;
+  const values=raw.includes('\n')
+    ? lines(raw).map(x=>x.trim()).filter(Boolean)
+    : raw.split(',').map(x=>x.trim()).filter(Boolean);
+  if(!values.length)return'IN ()';
+  const q=values.map(v=>/^[-+]?\d+(?:\.\d+)?$/.test(v)?v:`'${v.replace(/'/g,"''")}'`);
+  return `IN (\n  ${q.join(',\n  ')}\n)`;
+});
+
+reg('recipe','Show a short TGTT workflow recipe.','recipe [web-capture|json-api|csv-cleanup|file-compare]',async({a})=>{
+  const key=(a[0]||'').toLowerCase();
+  const recipes={
+    'web-capture':`WEB CAPTURE
+1. fetchweb https://example.test/apps/sample?page=grid
+2. Check Final URL / Redirected / Credentials.
+3. renderweb #1 10 "Sample Application Grid"
+4. Wait until the page visibly finishes rendering.
+5. Return to TGTT and click Capture Rendered Tab.
+6. Select the rendered page tab in the browser picker.`,
+    'json-api':`JSON API
+1. fetchjson https://api.example.test/v1/items
+2. inspect #1
+3. jsonpaths #1
+4. jsonkeys #1`,
+    'csv-cleanup':`CSV CLEANUP
+1. Load a CSV with Choose Local File.
+2. files
+3. inspect #1
+4. csvstats #1`,
+    'file-compare':`FILE COMPARE
+1. Load two files.
+2. files
+3. inspect #1
+4. inspect #2
+5. compare #1 #2`
+  };
+  if(!key)return `Recipes: ${Object.keys(recipes).join(', ')}\nUse: recipe <name>`;
+  if(!recipes[key])throw Error(`Unknown recipe. Available: ${Object.keys(recipes).join(', ')}`);
+  return recipes[key];
+});
+
+
+
+
+function openRenderedWebpage(f,waitSeconds=10,captureLabel=''){
+  if(!f||Array.isArray(f))throw Error('Webpage workspace item not found.');
+  const url=f.remoteUrl||f.requestedUrl;
+  if(!url)throw Error('Render Webpage requires a fetched webpage. Run fetchweb first.');
+  waitSeconds=Math.max(1,Math.min(120,Number(waitSeconds)||10));
+
+  const target=window.open(url,'_blank');
+  if(!target)throw Error('Popup blocked. Allow popups for TGTT and retry renderweb.');
+
+  const stamp=snapshotTimestamp();
+  const requestedLabel=String(captureLabel||'').trim();
+  const displayLabel=requestedLabel||f.name||'Rendered webpage';
+  const base=(displayLabel||'rendered-webpage')
+    .replace(/[<>:"/\\|?*\x00-\x1f]+/g,'_')
+    .trim()
+    .replace(/\.[^.]+$/,'')||'rendered-webpage';
+
+  const overlay=document.createElement('div');
+  overlay.id='tgttRenderCaptureOverlay';
+  overlay.style.cssText='position:fixed;z-index:2147483647;right:12px;bottom:12px;width:360px;max-width:calc(100vw - 24px);background:#0f1a2b;color:#e6edf7;border:1px solid #334155;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35);padding:12px;font:12px Consolas,monospace';
+  overlay.innerHTML=`
+    <div style="font-weight:900;margin-bottom:6px">TGTT Render Capture</div>
+    <div style="color:#94a3b8;margin-bottom:8px">Opened the webpage directly in a new tab so it can render normally.</div>
+    <div id="tgttRenderCountdown" style="margin-bottom:8px;color:#fbbf24">Waiting ${waitSeconds}s…</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button id="tgttRenderCaptureNow" style="border:1px solid #334155;background:#1d4ed8;color:#fff;border-radius:7px;padding:7px 10px;font:inherit;font-weight:900;cursor:pointer">Capture Rendered Tab</button>
+      <button id="tgttRenderOpenAgain" style="border:1px solid #334155;background:#17243a;color:#e6edf7;border-radius:7px;padding:7px 10px;font:inherit;font-weight:800;cursor:pointer">Open Again</button>
+      <button id="tgttRenderClosePanel" style="border:1px solid #334155;background:#17243a;color:#e6edf7;border-radius:7px;padding:7px 10px;font:inherit;font-weight:800;cursor:pointer">Close</button>
+    </div>
+    <div style="margin-top:8px;color:#64748b;word-break:break-all">${snapshotEsc(url)}</div>`;
+  document.body.appendChild(overlay);
+
+  let left=waitSeconds;
+  const cd=overlay.querySelector('#tgttRenderCountdown');
+  const timer=setInterval(()=>{
+    left--;
+    if(left>0)cd.textContent=`Waiting ${left}s…`;
+    else{
+      clearInterval(timer);
+      cd.textContent='Render wait complete — switch to the Smartsheet tab and make sure it is fully rendered, then return here and click Capture Rendered Tab.';
+      cd.style.color='#86efac';
+    }
+  },1000);
+
+  overlay.querySelector('#tgttRenderOpenAgain').onclick=()=>window.open(url,'_blank');
+  overlay.querySelector('#tgttRenderClosePanel').onclick=()=>{clearInterval(timer);overlay.remove()};
+  overlay.querySelector('#tgttRenderCaptureNow').onclick=async()=>{
+    const btn=overlay.querySelector('#tgttRenderCaptureNow');
+    try{
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia)throw Error('Screen capture API unavailable.');
+      btn.disabled=true;
+      btn.textContent='Choose Smartsheet Tab…';
+      const stream=await navigator.mediaDevices.getDisplayMedia({
+        video:{displaySurface:'browser'},
+        audio:false
+      });
+      const track=stream.getVideoTracks()[0];
+      const video=document.createElement('video');
+      video.srcObject=stream;
+      video.muted=true;
+      await video.play();
+      await new Promise(r=>setTimeout(r,300));
+      const videoW=video.videoWidth;
+      const videoH=video.videoHeight;
+      const headerH=82;
+      const canvas=document.createElement('canvas');
+      canvas.width=videoW;
+      canvas.height=videoH+headerH;
+      const ctx=canvas.getContext('2d');
+
+      /* Put the TGTT snapshot metadata in its own header ABOVE the captured
+         page so no webpage pixels are obscured. */
+      ctx.fillStyle='#0f172a';
+      ctx.fillRect(0,0,canvas.width,headerH);
+
+      ctx.fillStyle='#ffffff';
+      ctx.font='bold 18px Consolas, monospace';
+      ctx.fillText(displayLabel,16,27);
+
+      ctx.font='13px Consolas, monospace';
+      ctx.fillStyle='#cbd5e1';
+      ctx.fillText(`Snapshot: ${stamp.display} (24-hour)`,16,49);
+
+      ctx.font='11px Consolas, monospace';
+      ctx.fillStyle='#94a3b8';
+      ctx.fillText(stamp.localIso,16,67);
+
+      ctx.drawImage(video,0,headerH,videoW,videoH);
+      stream.getTracks().forEach(t=>t.stop());
+
+      const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+      if(!blob)throw Error('Could not create PNG.');
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=`${base}-${stamp.file}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+      btn.textContent='Capture Rendered Tab';
+    }catch(e){
+      alert('Capture failed: '+(e.message||e));
+    }finally{
+      btn.disabled=false;
+    }
+  };
+
+  return {file:f,waitSeconds,url,displayLabel};
+}
+
+reg('fetchweb','Fetch a remote webpage with browser session credentials into the Scratch Pad/workspace for normal commands, including snapshot.','fetchweb <url>',async({a})=>{
+  const raw=a.join(' ').trim();
+  if(!raw)throw Error('Use: fetchweb <url>');
+  const normalized=normalizeWebUrl(raw);
+  ui.status.textContent=`Normalized URL: ${normalized}`;
+  const f=await fetchWebpageIntoWorkspace(normalized);
+  return `Fetched webpage into workspace as ${fileLabel(f)}
+Requested URL : ${f.requestedUrl}
+Final URL     : ${f.remoteUrl}
+Redirected    : ${f.redirected?'YES':'NO'}
+Credentials   : INCLUDE
+Type          : ${f.type}
+Size          : ${human(f.size)}
+
+The returned HTML is now in the Scratch Pad and is the active workspace file. You can run snapshot normally, for example:
+snapshot #${f.id} My Webpage
+
+Authenticated fetch uses the browser's applicable cookies/session credentials. A CORS-unblocking extension may still be required. If Final URL is a login page, the remote application did not accept the browser session for this cross-origin request. JavaScript-heavy applications may return only an app shell rather than the fully rendered page.`;
+});
+
+reg('renderweb','Open a fetched webpage directly in a normal browser tab, wait for client-side rendering, then capture that rendered tab as PNG through the browser screen-share picker.','renderweb [#id|filename] [waitSeconds] [captureLabel]',async({a})=>{
+  let f=null,wait=10,label='';
+  if(!a.length)f=activeFile();
+  else{
+    let ref=a.shift();
+    f=resolveFileRef(ref);
+    if(!f||Array.isArray(f))throw Error('Use: renderweb [#id|filename] [waitSeconds] [captureLabel]. Run fetchweb first.');
+
+    if(a.length && /^\d+(?:\.\d+)?$/.test(a[0])){
+      wait=Number(a.shift());
+    }
+    label=a.join(' ').trim();
+  }
+  if(!f||Array.isArray(f))throw Error('Use: renderweb [#id|filename] [waitSeconds] [captureLabel]. Run fetchweb first.');
+  const r=openRenderedWebpage(f,wait,label);
+  return `Opened direct render tab for ${fileLabel(f)}
+URL         : ${r.url}
+Wait        : ${r.waitSeconds}s
+Mode        : DIRECT TAB
+Capture label: ${r.displayLabel}
+
+TGTT also opened a Render Capture panel in the original TGTT tab.
+1. Let the remote page finish rendering in its new browser tab.
+2. Return to TGTT.
+3. Click Capture Rendered Tab.
+4. In Edge's picker, select the rendered remote-page tab.
+
+Optional capture label example:
+renderweb #1 10 "Quarterly Project Status"
+
+The capture label controls the label embedded in the exported PNG and the PNG filename base.`;
+});
+
+
+reg('snapshot','Export any loaded file as HTML; an optional filename becomes the visible label and base filename for HTML/PNG.','snapshot [#id|filename] [outputFilename]',async({a})=>{
+  let f=null,base='';
+  if(!a.length)f=activeFile();
+  else{
+    f=resolveFileRef(a[0]);
+    if(!f||Array.isArray(f))throw Error('File not found. Use snapshot #id [outputFilename].');
+    base=a.slice(1).join(' ');
+  }
+  const r=await buildSnapshotFile(f,base);
+  return `Saved HTML snapshot: ${r.outName}\nSource: ${r.source}\nDisplay label: ${r.displayName}\nType: ${r.mime}\nCreated: ${r.stamp.display}\n\n${r.userNamed?'User filename mode: the supplied name is used as the display label/base; if it has no extension, TGTT inherits the uploaded file extension. The first-stage HTML shows timestamp details, and the final PNG image header includes the resolved filename plus timestamp while the physical PNG filename appends the snapshot date/time.':r.pdf?'PDF snapshot: every page is rendered into the HTML with no Edge PDF toolbar. Open it and click Export Full PDF PNG to save the entire document as one tall PNG.':'Open the HTML snapshot and use Export PNG.'}`;
+});
+
+reg('fileinfo','Show workspace file metadata.','fileinfo [#id|filename]',async({a})=>{let f=resolveFileRef(a.join(' '));if(!f||Array.isArray(f))throw Error('File not found.');return`id: #${f.id}\nname: ${f.name}\nsize: ${f.size} (${human(f.size)})\ntype: ${f.type||'(unknown)'}\nlast modified: ${new Date(f.lastModified).toLocaleString()}\nactive: ${f.id===activeFileId?'yes':'no'}`});
+reg('hexdump','Hex dump workspace file.','hexdump [bytes] [#id|filename]',async({a})=>{let n=256,ref='';if(a[0]&&/^\d+$/.test(a[0])){n=Math.min(4096,Math.max(16,+a[0]));ref=a.slice(1).join(' ')}else ref=a.join(' ');let f=resolveFileRef(ref);if(!f||Array.isArray(f))throw Error('File not found.');let b=TE.encode(f.text).slice(0,n),o=[];for(let i=0;i<b.length;i+=16){let r=b.slice(i,i+16),hx=[...r].map(x=>x.toString(16).padStart(2,'0')).join(' ').padEnd(47),as=[...r].map(x=>x>=32&&x<127?String.fromCharCode(x):'.').join('');o.push(i.toString(16).padStart(8,'0')+'  '+hx+'  '+as)}return o.join('\n')});
+reg('copy','Copy last output.','copy',async()=>{await navigator.clipboard.writeText(last);return'Copied last output.'});reg('save','Save last output locally.','save [filename]',async({a,input})=>{let n=a[0]||'tgtt-output.txt',blob=new Blob([last||input],{type:'text/plain'}),x=document.createElement('a');x.href=URL.createObjectURL(blob);x.download=n;x.click();setTimeout(()=>URL.revokeObjectURL(x.href),1000);return'Saved '+n});
+async function seg(s,p=null){let A=argsOf(s),n=(A.shift()||'').toLowerCase(),c=C[n];if(!c)throw Error('Unknown command: '+n+'. Try help.');let i=s.search(/\s/),rest=i<0?'':s.slice(i+1),input=p!==null?String(p):ui.scratch.value;return c.f({a:A,rest,input})}
+async function run(line=ui.cmd.value){line=(line||'').trim();if(!line)return;hist.push(line);hi=hist.length;ui.cmd.value='';ui.status.textContent='Running…';try{let stages=pipeSplit(line),v=null;for(let s of stages)v=await seg(s,v);v=v==null?'':String(v);if(line.toLowerCase()!=='clear'){last=v;print(line,v,'ok',stages.length>1?`${stages.length} pipeline stages`:'')}ui.status.textContent='Ready · v0046'}catch(e){print(line,e.message||String(e),'err');ui.status.textContent='Error'}}
+function renderCatalog(){
+  const q=(ui.catalogSearch.value||'').trim().toLowerCase(),cat=ui.catalogCategory.value;
+  ui.catalog.innerHTML='';
+  let shown=0;
+  for(const c of canon()){
+    const cc=categoryOf(c.n),hay=(c.n+' '+c.s+' '+c.u+' '+cc).toLowerCase();
+    if((q&&!hay.includes(q))||(cat&&cc!==cat))continue;
+    shown++;
+    let d=document.createElement('div');d.className='ci';
+    d.innerHTML=`<b>${esc(c.n)}</b><span class="cat">${esc(cc)}</span><span>${esc(c.s)}</span><span class="usage">${esc(c.u)}</span>`;
+    d.onclick=()=>{ui.cmd.value=c.u;ui.cmd.focus()};ui.catalog.appendChild(d)
+  }
+  if(!shown){let d=document.createElement('div');d.className='ci';d.innerHTML='<span>No matching commands.</span>';ui.catalog.appendChild(d)}
+}
+function init(){
+  let quick=['help','files','fetchweb https://example.com','renderweb #1 10','snapshot #1','jsonschemapaths #1','jsondiff #1 #2','jsonpaths #1','jsonschemaexample #1','csvstats #1','workspacehash'];
+  for(let q of quick){let b=document.createElement('button');b.textContent=q;b.onclick=()=>{ui.cmd.value=q;ui.cmd.focus()};ui.quick.appendChild(b)}
+  let cc=canon();ui.count.textContent=cc.length;
+  const cats=uniq(cc.map(c=>categoryOf(c.n))).sort();
+  for(const cat of cats){let o=document.createElement('option');o.value=cat;o.textContent=cat;ui.catalogCategory.appendChild(o)}
+  ui.catalogSearch.oninput=renderCatalog;ui.catalogCategory.onchange=renderCatalog;renderCatalog();refreshFileBox();renderWorkspace();
+  $('year').textContent=new Date().getFullYear();
+  print('startup','TGTT Tiny Terminal v0046 ready. 189 commands available. Added jsonpathvalues to flatten loaded JSON into JSONPath-style path/value lines, with optional all mode for objects and arrays.','ok');ui.cmd.focus()
+}
+
+ui.run.onclick=()=>run();ui.cmd.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();run()}else if(e.key==='ArrowUp'){e.preventDefault();if(hist.length){hi=Math.max(0,hi-1);ui.cmd.value=hist[hi]||''}}else if(e.key==='ArrowDown'){e.preventDefault();if(hist.length){hi=Math.min(hist.length,hi+1);ui.cmd.value=hist[hi]||''}}};$('help').onclick=()=>run('help');$('clear').onclick=()=>{ui.out.innerHTML='';ui.cmd.focus()};$('copyLast').onclick=async()=>{try{await navigator.clipboard.writeText(last);ui.status.textContent='Copied last output'}catch{ui.status.textContent='Clipboard unavailable'}};$('useLast').onclick=()=>ui.scratch.value=last;$('clearScratch').onclick=()=>ui.scratch.value='';$('loadFile').onclick=e=>{e.preventDefault();const picker=$('file');picker.value='';picker.click()};
+$('fetchWebpage').onclick=()=>{
+  const url=prompt('Fetch webpage URL (raw URL or pasted Markdown link):','https://');
+  if(url&&url.trim())run(`fetchweb "${url.trim().replace(/"/g,'')}"`);
+};
+$('renderWebpage').onclick=()=>{
+  const f=activeFile();
+  if(!f||(!f.remoteUrl&&!f.requestedUrl)){ui.status.textContent='Fetch a webpage first';return}
+  const wait=prompt('Seconds to wait before TGTT marks the direct page ready for capture:','10');
+  if(wait!==null)run(`renderweb #${f.id} ${String(wait).trim()||'10'}`);
+};
+$('clearFile').onclick=()=>{workspaceFiles=[];activeFileId=null;ui.file.value='';refreshFileBox();renderWorkspace();ui.status.textContent='Workspace cleared'};ui.file.onchange=async()=>addFiles(ui.file.files);['dragover','dragenter'].forEach(ev=>ui.scratch.addEventListener(ev,e=>{e.preventDefault();e.dataTransfer.dropEffect='copy';ui.fileBox.classList.add('dropactive')}));['dragleave','drop'].forEach(ev=>ui.scratch.addEventListener(ev,()=>ui.fileBox.classList.remove('dropactive')));ui.scratch.ondrop=async e=>{e.preventDefault();await addFiles(e.dataTransfer.files)};init();
+})();
+</script>
+</body>
+</html>
