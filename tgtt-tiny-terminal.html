@@ -39,7 +39,7 @@
 </div>
 <script>
 (()=>{'use strict';
-const APP_VERSION='v0048';
+const APP_VERSION='v0050';
 const $=id=>document.getElementById(id),ui={out:$('output'),cmd:$('command'),run:$('run'),scratch:$('scratch'),status:$('status'),quick:$('quick'),catalog:$('catalog'),count:$('count'),file:$('file'),catalogSearch:$('catalogSearch'),catalogCategory:$('catalogCategory'),fileBox:$('fileBox'),fileLabel:$('fileLabel'),fileMeta:$('fileMeta'),workspaceList:$('workspaceList'),catalogVersion:$('catalogVersion')};
 ui.status.textContent=`Ready · ${APP_VERSION}`;
 if(ui.catalogVersion)ui.catalogVersion.textContent=APP_VERSION;
@@ -161,6 +161,65 @@ function universalScreenCaptureCode(safeBase,stampFile,userNamed=false){
   });
 })();`;
 }
+
+function imageSnapshotExportCode(safeBase,stampFile,userNamed,sourceName,stampDisplay,stampLocalIso){
+  return `
+(()=>{
+  const btn=document.getElementById('tgttExportPng');
+  const msg=document.getElementById('tgttStatus');
+  const img=document.querySelector('.image-stage img');
+  if(!btn||!img)return;
+  const setMsg=t=>{if(msg)msg.textContent=t||''};
+  const canvasBlob=c=>new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(Error('PNG encoding failed.')),'image/png'));
+  const downloadBlob=(blob,name)=>{
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  };
+  btn.addEventListener('click',async()=>{
+    const old=btn.textContent;btn.disabled=true;btn.textContent='Building PNG…';
+    try{
+      if(!img.complete)await new Promise((ok,no)=>{
+        img.addEventListener('load',ok,{once:true});
+        img.addEventListener('error',()=>no(Error('Image could not be decoded.')),{once:true});
+      });
+      const iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
+      if(!iw||!ih)throw Error('Image dimensions are unavailable.');
+      const pad=20,header=92,rawW=iw+pad*2,rawH=header+pad+ih+pad;
+      const maxDim=32000,maxPixels=120000000;
+      let scale=Math.min(1,maxDim/rawW,maxDim/rawH,Math.sqrt(maxPixels/(rawW*rawH)));
+      if(!isFinite(scale)||scale<=0)scale=1;
+      const out=document.createElement('canvas');
+      out.width=Math.max(1,Math.floor(rawW*scale));out.height=Math.max(1,Math.floor(rawH*scale));
+      const ctx=out.getContext('2d',{alpha:false}),S=v=>v*scale;
+      ctx.fillStyle='#2f2f2f';ctx.fillRect(0,0,out.width,out.height);
+      ctx.fillStyle='#07111f';ctx.fillRect(0,0,out.width,S(header));
+      ctx.textBaseline='top';
+      if(${JSON.stringify(userNamed)}){
+        ctx.font=Math.max(12,S(20))+'px Consolas, monospace';ctx.fillStyle='#fff';
+        ctx.fillText(${JSON.stringify(sourceName)},S(18),S(14));
+        ctx.font=Math.max(10,S(13))+'px Consolas, monospace';ctx.fillStyle='#cbd5e1';
+        ctx.fillText('Snapshot: '+${JSON.stringify(stampDisplay)},S(18),S(43));
+        ctx.font=Math.max(9,S(11))+'px Consolas, monospace';ctx.fillStyle='#94a3b8';
+        ctx.fillText(${JSON.stringify(stampLocalIso)},S(18),S(61));
+      }else{
+        ctx.font=Math.max(12,S(20))+'px Consolas, monospace';ctx.fillStyle='#fff';
+        ctx.fillText('Snapshot: '+${JSON.stringify(stampDisplay)},S(18),S(14));
+        ctx.font=Math.max(10,S(13))+'px Consolas, monospace';ctx.fillStyle='#cbd5e1';
+        ctx.fillText(${JSON.stringify(stampLocalIso)},S(18),S(41));
+        ctx.font=Math.max(9,S(11))+'px Consolas, monospace';ctx.fillStyle='#94a3b8';
+        ctx.fillText(${JSON.stringify(sourceName)},S(18),S(59));
+      }
+      ctx.fillStyle='#fff';ctx.fillRect(S(pad),S(header+pad),S(iw),S(ih));
+      ctx.drawImage(img,S(pad),S(header+pad),S(iw),S(ih));
+      const blob=await canvasBlob(out);
+      downloadBlob(blob,${JSON.stringify(safeBase+'-'+stampFile+'.png')});
+      setMsg('PNG saved.'+(scale<1?' Export scaled to '+Math.round(scale*100)+'% to fit browser canvas limits.':''));
+    }catch(e){setMsg(e.message||String(e));alert('PNG export failed.\\n\\n'+(e.message||e))}
+    finally{btn.textContent=old;btn.disabled=false}
+  });
+})();`;
+}
+
 async function buildPdfSnapshotHtml({name,bytes,stamp,safeBase,userNamed=false}){
   const src=await snapshotLoadPdfJsSources();
   const pdfB64=bytesToBase64Chunked(bytes);
@@ -373,6 +432,40 @@ ${moduleTag}
 </body>
 </html>`;
 }
+
+async function buildTimestampedImage(f,outputBase=''){
+  if(!f)throw Error('Load an image first or provide #id/filename.');
+  const mime=snapshotMime(f);
+  if(!/^image\/(jpeg|png|webp)$/i.test(mime))throw Error('Timestamp image supports JPG/JPEG, PNG, and WEBP files.');
+  const stamp=snapshotTimestamp();
+  const bytes=await snapshotFileBytes(f);
+  const blob=new Blob([bytes],{type:mime});
+  const url=URL.createObjectURL(blob);
+  try{
+    const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(Error('Could not decode image.'));i.src=url});
+    const c=document.createElement('canvas');c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;
+    const x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);
+    const pad=Math.max(12,Math.round(Math.min(c.width,c.height)*.018));
+    const fs=Math.max(18,Math.round(Math.min(c.width,c.height)*.035));
+    const label=stamp.display;
+    x.font=`700 ${fs}px Consolas, 'Courier New', monospace`;x.textBaseline='bottom';x.textAlign='right';
+    const tw=x.measureText(label).width, boxH=Math.round(fs*1.45);
+    x.fillStyle='rgba(0,0,0,.68)';x.fillRect(c.width-tw-pad*2,c.height-boxH-pad,tw+pad*2,boxH);
+    x.lineWidth=Math.max(2,Math.round(fs/14));x.strokeStyle='rgba(0,0,0,.9)';x.fillStyle='#fff';
+    x.strokeText(label,c.width-pad,c.height-pad-Math.round(fs*.12));x.fillText(label,c.width-pad,c.height-pad-Math.round(fs*.12));
+    const sourceName=f.name||'image';
+    const supplied=String(outputBase||'').trim();
+    const sourceExt=(sourceName.match(/\.(jpe?g|png|webp)$/i)||[])[0]||'.png';
+    let outName=supplied||sourceName.replace(/\.[^.]+$/,'')+'-timestamped-'+stamp.file+sourceExt;
+    if(supplied&&!/\.(jpe?g|png|webp)$/i.test(outName))outName+=sourceExt;
+    outName=outName.replace(/[<>:"/\\|?*\x00-\x1f]+/g,'_');
+    const outMime=/\.jpe?g$/i.test(outName)?'image/jpeg':/\.webp$/i.test(outName)?'image/webp':'image/png';
+    const outBlob=await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(Error('Image encoding failed.')),outMime,.95));
+    const a=document.createElement('a');a.href=URL.createObjectURL(outBlob);a.download=outName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);
+    return {outName,stamp,source:sourceName,mime:outMime};
+  } finally { URL.revokeObjectURL(url); }
+}
+
 async function buildSnapshotFile(f,outputBase=''){
   if(!f)throw Error('Load a document first or provide #id/filename.');
 
@@ -416,7 +509,9 @@ async function buildSnapshotFile(f,outputBase=''){
       </object>`;
     }
 
-    const exportCode=universalScreenCaptureCode(exportBase,stamp.file,!!suppliedBase);
+    const exportCode=/^image\//i.test(mime)
+      ? imageSnapshotExportCode(exportBase,stamp.file,!!suppliedBase,displayName,stamp.display,stamp.localIso)
+      : universalScreenCaptureCode(exportBase,stamp.file,!!suppliedBase);
     const scriptTag='<scr'+'ipt>'+exportCode+'</scr'+'ipt>';
     html=`<!doctype html>
 <html>
@@ -441,7 +536,7 @@ async function buildSnapshotFile(f,outputBase=''){
 </style>
 </head>
 <body>
-<div id="tgttBar"><button id="tgttExportPng" type="button">Export PNG</button><div id="tgttStatus">Capture this rendered snapshot with the browser.</div><div id="tgttStamp">Snapshot: ${snapshotEsc(stamp.display)}<br><span>${snapshotEsc(stamp.localIso)}</span><br><span>${snapshotEsc(displayName)}</span></div></div>
+<div id="tgttBar"><button id="tgttExportPng" type="button">Export PNG</button><div id="tgttStatus">${/^image\//i.test(mime)?'Ready · image exports directly with the TGTT snapshot header.':'Capture this rendered snapshot with the browser.'}</div><div id="tgttStamp">Snapshot: ${snapshotEsc(stamp.display)}<br><span>${snapshotEsc(stamp.localIso)}</span><br><span>${snapshotEsc(displayName)}</span></div></div>
 <div id="stage">${viewer}</div>
 ${scriptTag}
 </body></html>`;
@@ -1877,6 +1972,18 @@ The capture label controls the label embedded in the exported PNG and the PNG fi
 });
 
 
+reg('timestampimage','Burn the current local TGTT timestamp directly onto a JPG/JPEG, PNG, or WEBP image and save a new image.','timestampimage [#id|filename] [outputFilename]',async({a})=>{
+  let f=null,base='';
+  if(!a.length)f=activeFile();
+  else{
+    f=resolveFileRef(a[0]);
+    if(!f||Array.isArray(f))throw Error('File not found. Use: timestampimage #id [outputFilename].');
+    base=a.slice(1).join(' ');
+  }
+  const r=await buildTimestampedImage(f,base);
+  return `Saved timestamped image: ${r.outName}\nSource: ${r.source}\nTimestamp: ${r.stamp.display}\nLocal ISO: ${r.stamp.localIso}\n\nThe timestamp is burned into the lower-right corner of the exported image.`;
+});
+
 reg('snapshot','Export any loaded file as HTML; an optional filename becomes the visible label and base filename for HTML/PNG.','snapshot [#id|filename] [outputFilename]',async({a})=>{
   let f=null,base='';
   if(!a.length)f=activeFile();
@@ -1916,7 +2023,7 @@ function init(){
   for(const cat of cats){let o=document.createElement('option');o.value=cat;o.textContent=cat;ui.catalogCategory.appendChild(o)}
   ui.catalogSearch.oninput=renderCatalog;ui.catalogCategory.onchange=renderCatalog;renderCatalog();refreshFileBox();renderWorkspace();
   $('year').textContent=new Date().getFullYear();
-  print('startup','TGTT Tiny Terminal ${APP_VERSION} ready. 189 commands available. Added jsonpathvalues to flatten loaded JSON into JSONPath-style path/value lines, with optional all mode for objects and arrays.','ok');ui.cmd.focus()
+  print('startup','TGTT Tiny Terminal ${APP_VERSION} ready. 189 commands available. Image snapshots now export directly to PNG with the same TGTT timestamp header style as PDF snapshots; no browser screen-share capture is required.','ok');ui.cmd.focus()
 }
 
 ui.run.onclick=()=>run();ui.cmd.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();run()}else if(e.key==='ArrowUp'){e.preventDefault();if(hist.length){hi=Math.max(0,hi-1);ui.cmd.value=hist[hi]||''}}else if(e.key==='ArrowDown'){e.preventDefault();if(hist.length){hi=Math.min(hist.length,hi+1);ui.cmd.value=hist[hi]||''}}};$('help').onclick=()=>run('help');$('clear').onclick=()=>{ui.out.innerHTML='';ui.cmd.focus()};$('copyLast').onclick=async()=>{try{await navigator.clipboard.writeText(last);ui.status.textContent='Copied last output'}catch{ui.status.textContent='Clipboard unavailable'}};$('useLast').onclick=()=>ui.scratch.value=last;$('clearScratch').onclick=()=>ui.scratch.value='';$('loadFile').onclick=e=>{e.preventDefault();const picker=$('file');picker.value='';picker.click()};
